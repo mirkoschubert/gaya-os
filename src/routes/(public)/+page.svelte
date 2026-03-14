@@ -18,7 +18,7 @@
     Experimental · Democratic · Open
   </div>
   <h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
-    Welcome to <span class="text-primary">Gaya</span>
+    Welcome to <span class="text-primary">Civitas Gaya</span>
   </h1>
   <p class="mx-auto mb-8 max-w-xl text-muted-foreground">
     A virtual micro-nation and experimental lab for council democracy, liquid

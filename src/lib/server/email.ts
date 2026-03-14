@@ -3,9 +3,9 @@ import { RESEND_API_KEY, RESEND_FROM_EMAIL } from '$env/static/private'
 
 const resend = new Resend(RESEND_API_KEY)
 
-// Without a verified domain, Resend only allows sending from onboarding@resend.dev
-// and only to the email address registered with your Resend account.
-// Once you verify a domain, update RESEND_FROM_EMAIL to e.g. "Gaya OS <noreply@yourdomain.com>"
+// Verified domain: updates.civitasgaya.org
+// Without RESEND_FROM_EMAIL set, falls back to Resend test mode (onboarding@resend.dev),
+// which only delivers to the Resend account email.
 const fromEmail = RESEND_FROM_EMAIL || 'Gaya OS <onboarding@resend.dev>'
 
 export async function sendVerificationEmail({
