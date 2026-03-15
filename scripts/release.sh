@@ -55,8 +55,9 @@ fi
 RELEASE_NOTES=$(awk "
   /^## \[${CHANGELOG_VERSION}\]/ { found=1; next }
   found && /^## \[/ { exit }
-  found { print }
-" "$CHANGELOG" | sed '/^$/d' | sed '1{/^$/d}')
+  found && NF { printing=1 }
+  printing { print }
+" "$CHANGELOG")
 
 if [[ -z "$RELEASE_NOTES" ]]; then
   echo "❌ No release notes found for version $CHANGELOG_VERSION in $CHANGELOG"
