@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "prisma migrate deploy --schema prisma/schema.production.prisma && prisma generate --schema prisma/schema.production.prisma && vite build",
+		"build": "prisma migrate deploy && prisma generate && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"postinstall": "prisma generate",
@@ -24,8 +24,8 @@
 		"@sveltejs/adapter-auto": "^7.0.0",
 		"@sveltejs/kit": "^2.50.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
-		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^25.5.0",
+		"@types/pg": "^8.18.0",
 		"@vitest/browser-playwright": "^4.1.0",
 		"bits-ui": "^2.16.3",
 		"clsx": "^2.1.1",
@@ -48,11 +48,11 @@
 	},
 	"dependencies": {
 		"@better-auth/passkey": "^1.5.5",
-		"@prisma/adapter-better-sqlite3": "^7.5.0",
+		"@prisma/adapter-pg": "^7.5.0",
 		"@prisma/client": "^7.5.0",
 		"@tailwindcss/vite": "^4.2.1",
 		"better-auth": "^1.5.5",
-		"better-sqlite3": "^12.8.0",
+		"pg": "^8.20.0",
 		"resend": "^6.9.3",
 		"tailwindcss": "^4.2.1"
 	}

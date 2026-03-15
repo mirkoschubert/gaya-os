@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // ──────────────────────────────────────────────
@@ -227,7 +227,7 @@ model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
   action    String
-  metadata  String? // JSON stored as string for SQLite compatibility
+  metadata  Json?
   createdAt DateTime @default(now())
 }
 

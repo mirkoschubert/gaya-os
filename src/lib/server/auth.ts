@@ -9,7 +9,7 @@ import { getBaseUrl } from '$lib/url'
 
 export const auth = betterAuth({
   baseURL: getBaseUrl(),
-  database: prismaAdapter(prisma, { provider: process.env.VERCEL ? 'postgresql' : 'sqlite' }),
+  database: prismaAdapter(prisma, { provider: 'postgresql' }),
 
   plugins: [passkey(), username()],
 
