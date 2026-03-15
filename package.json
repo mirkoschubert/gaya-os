@@ -1,7 +1,7 @@
 {
 	"name": "gaya-os",
 	"private": true,
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -9,6 +9,7 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"postinstall": "prisma generate",
+		"release": "zsh scripts/release.sh",
 		"db:studio": "prisma studio",
 		"db:migrate": "prisma migrate dev",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
