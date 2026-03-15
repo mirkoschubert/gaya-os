@@ -5,6 +5,9 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	ssr: {
+		external: ['pg-native', 'cloudflare:sockets', '@react-email/render']
+	},
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
