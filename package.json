@@ -47,6 +47,16 @@
 		"vitest": "^4.1.0",
 		"vitest-browser-svelte": "^2.0.2"
 	},
+	"pnpm": {
+		"peerDependencyRules": {
+			"ignoreMissing": [
+				"better-sqlite3",
+				"@react-email/render",
+				"pg-native",
+				"cloudflare:sockets"
+			]
+		}
+	},
 	"dependencies": {
 		"@better-auth/passkey": "^1.5.5",
 		"@prisma/adapter-pg": "^7.5.0",
