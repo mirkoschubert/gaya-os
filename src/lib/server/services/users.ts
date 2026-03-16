@@ -1,4 +1,5 @@
 import { prisma } from '$lib/server/prisma'
+import { logAction } from './audit'
 
 export type AdminUserView = {
   id: string
@@ -12,6 +13,7 @@ export type AdminUserView = {
   citizenId: string | null
   emailVerified: boolean
   joinedAt: Date | null
+  lastLogin: Date | null
   createdAt: Date
 }
 
@@ -30,6 +32,7 @@ export async function listUsers(): Promise<AdminUserView[]> {
       citizenId: true,
       emailVerified: true,
       joinedAt: true,
+      lastLogin: true,
       createdAt: true
     }
   })
@@ -37,18 +40,30 @@ export async function listUsers(): Promise<AdminUserView[]> {
 
 export async function setUserRole(
   userId: string,
-  role: 'USER' | 'MODERATOR' | 'ADMIN'
+  role: 'USER' | 'MODERATOR' | 'ADMIN',
+  actorId?: string
 ): Promise<void> {
+  const previous = await prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: { role: true }
+  })
   await prisma.user.update({ where: { id: userId }, data: { role } })
-  await prisma.auditLog.create({
-    data: { userId, action: 'ADMIN_SET_ROLE', metadata: JSON.stringify({ role }) }
+  await logAction({
+    userId: actorId ?? userId,
+    action: 'ROLE_CHANGED',
+    entityType: 'USER',
+    entityId: userId,
+    metadata: { previousRole: previous.role, newRole: role }
   })
 }
 
-export async function setEmailVerified(userId: string): Promise<void> {
+export async function setEmailVerified(userId: string, actorId?: string): Promise<void> {
   await prisma.user.update({ where: { id: userId }, data: { emailVerified: true } })
-  await prisma.auditLog.create({
-    data: { userId, action: 'ADMIN_VERIFY_EMAIL' }
+  await logAction({
+    userId: actorId ?? userId,
+    action: 'EMAIL_VERIFIED',
+    entityType: 'USER',
+    entityId: userId
   })
 }
 

@@ -3,11 +3,14 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { passkey } from '@better-auth/passkey'
 import { username } from 'better-auth/plugins'
 import { svelteKitHandler } from 'better-auth/svelte-kit'
+import { BETTER_AUTH_SECRET } from '$env/static/private'
 import { prisma } from './prisma'
 import { sendVerificationEmail } from './email'
+import { logAction } from './services/audit'
 import { getBaseUrl } from '$lib/url'
 
 export const auth = betterAuth({
+  secret: BETTER_AUTH_SECRET,
   baseURL: getBaseUrl(),
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
 
@@ -26,6 +29,50 @@ export const auth = betterAuth({
     },
     autoSignInAfterVerification: true,
     sendOnSignUp: true
+  },
+
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await logAction({
+            userId: user.id,
+            action: 'USER_REGISTERED',
+            entityType: 'USER',
+            entityId: user.id,
+            metadata: { email: user.email }
+          })
+        }
+      }
+    },
+    session: {
+      create: {
+        after: async (session) => {
+          await Promise.all([
+            prisma.user.update({
+              where: { id: session.userId },
+              data: { lastLogin: new Date() }
+            }),
+            logAction({
+              userId: session.userId,
+              action: 'USER_LOGGED_IN',
+              entityType: 'USER',
+              entityId: session.userId
+            })
+          ])
+        }
+      },
+      delete: {
+        before: async (session) => {
+          await logAction({
+            userId: session.userId,
+            action: 'USER_LOGGED_OUT',
+            entityType: 'USER',
+            entityId: session.userId
+          })
+        }
+      }
+    }
   },
 
   user: {
@@ -56,6 +103,11 @@ export const auth = betterAuth({
         input: false
       },
       joinedAt: {
+        type: 'date',
+        required: false,
+        input: false
+      },
+      lastLogin: {
         type: 'date',
         required: false,
         input: false

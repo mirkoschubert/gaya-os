@@ -88,6 +88,7 @@
           <Table.Head>Status</Table.Head>
           <Table.Head>Verified</Table.Head>
           <Table.Head>Joined</Table.Head>
+          <Table.Head>Last Login</Table.Head>
           <Table.Head class="w-10"></Table.Head>
         </Table.Row>
       </Table.Header>
@@ -118,6 +119,9 @@
             </Table.Cell>
             <Table.Cell class="text-muted-foreground text-sm">
               {formatDate(user.createdAt)}
+            </Table.Cell>
+            <Table.Cell class="text-muted-foreground text-sm">
+              {formatDate(user.lastLogin)}
             </Table.Cell>
             <Table.Cell>
               <DropdownMenu.Root>

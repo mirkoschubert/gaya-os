@@ -87,7 +87,8 @@
     { value: 'other', label: 'Other' },
   ]
 
-  let selectedTopic = $state(form?.topic ?? '')
+  let selectedTopic = $state('')
+  $effect(() => { selectedTopic = form?.topic ?? '' })
   let consent = $state(false)
 </script>
 

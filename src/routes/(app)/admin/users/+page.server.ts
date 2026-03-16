@@ -23,7 +23,7 @@ export const actions: Actions = {
     if (userId === locals.user.id) {
       return fail(400, { message: 'Cannot change your own role.' })
     }
-    await setUserRole(userId, role)
+    await setUserRole(userId, role, locals.user.id)
     return { success: true }
   },
 
@@ -32,7 +32,7 @@ export const actions: Actions = {
     const data = await request.formData()
     const userId = data.get('userId') as string
     if (!userId) return fail(400, { message: 'Missing userId.' })
-    await setEmailVerified(userId)
+    await setEmailVerified(userId, locals.user.id)
     return { success: true }
   },
 

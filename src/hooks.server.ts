@@ -1,5 +1,6 @@
 import { auth } from '$lib/server/auth'
 import { prisma } from '$lib/server/prisma'
+import { logAction } from '$lib/server/services/audit'
 import { ADMIN_EMAIL } from '$env/static/private'
 import type { Handle } from '@sveltejs/kit'
 
@@ -26,6 +27,13 @@ export const handle: Handle = async ({ event, resolve }) => {
         citizenId: 'CX-ADMIN-0001',
         joinedAt: session.user.joinedAt ?? new Date()
       }
+    })
+    await logAction({
+      userId: session.user.id,
+      action: 'ROLE_CHANGED',
+      entityType: 'USER',
+      entityId: session.user.id,
+      metadata: { previousRole: session.user.role, newRole: 'ADMIN', trigger: 'auto_promotion' }
     })
     // Refresh locals with updated data
     const updated = await auth.api.getSession({

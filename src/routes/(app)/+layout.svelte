@@ -14,6 +14,7 @@
     Vote,
     Wallet,
     IdCard,
+    Activity,
     Settings2,
     Users,
     LogOut,
@@ -33,7 +34,8 @@
     { href: '/proposals', label: 'Proposals', icon: FileText },
     { href: '/votes', label: 'Votes', icon: Vote },
     { href: '/budget', label: 'Budget', icon: Wallet },
-    { href: '/citizenship', label: 'Citizenship', icon: IdCard }
+    { href: '/citizenship', label: 'Citizenship', icon: IdCard },
+    { href: '/activity', label: 'Activity', icon: Activity }
   ]
 
   const isAdmin = $derived(user?.role === 'ADMIN')
@@ -44,6 +46,7 @@
     '/votes': 'Votes',
     '/budget': 'Budget',
     '/citizenship': 'Citizenship',
+    '/activity': 'Activity',
     '/admin': 'Admin',
     '/admin/users': 'User Management',
     '/settings/profile': 'Profile Settings',

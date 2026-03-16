@@ -1,4 +1,5 @@
 import { prisma } from '$lib/server/prisma'
+import { logAction } from './audit'
 
 /**
  * Generates a citizen ID in the format CX-YYYY-NNNN.
@@ -37,11 +38,11 @@ export async function applyForCitizenship(userId: string): Promise<void> {
     }
   })
 
-  await prisma.auditLog.create({
-    data: {
-      userId,
-      action: 'CITIZENSHIP_GRANTED',
-      metadata: JSON.stringify({ citizenId, grantedAt: now.toISOString() })
-    }
+  await logAction({
+    userId,
+    action: 'CITIZENSHIP_GRANTED',
+    entityType: 'USER',
+    entityId: userId,
+    metadata: { citizenId, grantedAt: now.toISOString() }
   })
 }

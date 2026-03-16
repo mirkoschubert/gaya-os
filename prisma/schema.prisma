@@ -224,11 +224,19 @@ model BudgetProject {
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  action    String
-  metadata  Json?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user user? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([action, createdAt(sort: Desc)])
 }
 
 // ──────────────────────────────────────────────
@@ -255,10 +263,12 @@ model user {
   civicStatus String    @default("VISITOR")
   citizenId   String?   @unique
   joinedAt    DateTime?
+  lastLogin   DateTime?
 
   sessions    session[]
   accounts    account[]
   passkeys    passkey[]
+  auditLogs   AuditLog[]
 }
 
 model session {
