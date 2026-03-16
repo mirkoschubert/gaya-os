@@ -102,7 +102,7 @@
       data-parallax="0.38"
       style="margin-top: 120px; will-change: transform; z-index: 10;"
     >
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">The Awakening</h2>
+      <h2 class="mb-6 text-3xl font-bold tracking-tight">The Awakening</h2>
       <p class="text-muted-foreground leading-relaxed">
         We were few when we awoke. No angels, no devils — just a few dozen
         confused people in metal corridors under alien light. Earth's records
@@ -176,7 +176,7 @@
       data-parallax="0.35"
       style="will-change: transform; z-index: 10;"
     >
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+      <h2 class="mb-6 text-3xl font-bold tracking-tight">
         The First Councils
       </h2>
       <p class="text-muted-foreground leading-relaxed">
@@ -252,7 +252,7 @@
       data-parallax="0.4"
       style="margin-top: 160px; will-change: transform; z-index: 10;"
     >
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+      <h2 class="mb-6 text-3xl font-bold tracking-tight">
         The Hard Question
       </h2>
       <p class="text-muted-foreground leading-relaxed">
@@ -318,7 +318,7 @@
       data-parallax="0.32"
       style="margin-top: 100px; will-change: transform; z-index: 10;"
     >
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+      <h2 class="mb-6 text-3xl font-bold tracking-tight">
         Return to Earth
       </h2>
       <p class="text-muted-foreground leading-relaxed">
@@ -366,7 +366,7 @@
   <!-- Text: left-aligned, fades in -->
   <div class="relative z-10 px-8 max-w-7xl mx-auto w-full">
     <div class="max-w-xl" data-fade>
-      <h2 class="mb-8 text-3xl font-semibold tracking-tight text-white">
+      <h2 class="mb-8 text-3xl font-bold tracking-tight text-white">
         The Foundation Stone
       </h2>
       <p class="mb-6 text-lg text-white/70 leading-relaxed">

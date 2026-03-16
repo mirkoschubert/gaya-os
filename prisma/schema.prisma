@@ -33,6 +33,7 @@ enum MembershipRole {
 enum DocumentType {
   CONSTITUTION
   POLICY
+  PROCEDURE
 }
 
 enum DocumentStatus {
@@ -119,14 +120,31 @@ model Council {
 }
 
 model Document {
-  id        String         @id @default(cuid())
+  id        String            @id @default(cuid())
   title     String
-  content   String
   type      DocumentType
-  version   Int
-  status    DocumentStatus @default(DRAFT)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  slug      String            @unique
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  versions  DocumentVersion[]
+}
+
+model DocumentVersion {
+  id           String         @id @default(cuid())
+  documentId   String
+  versionLabel String
+  content      String
+  status      DocumentStatus @default(DRAFT)
+  changelog   String?
+  createdAt   DateTime       @default(now())
+  createdById String?
+
+  document    Document       @relation(fields: [documentId], references: [id])
+  createdBy   user?          @relation(fields: [createdById], references: [id])
+
+  @@unique([documentId, versionLabel])
+  @@index([documentId, status])
 }
 
 model Proposal {
@@ -265,10 +283,11 @@ model user {
   joinedAt    DateTime?
   lastLogin   DateTime?
 
-  sessions    session[]
-  accounts    account[]
-  passkeys    passkey[]
-  auditLogs   AuditLog[]
+  sessions         session[]
+  accounts         account[]
+  passkeys         passkey[]
+  auditLogs        AuditLog[]
+  documentVersions DocumentVersion[]
 }
 
 model session {

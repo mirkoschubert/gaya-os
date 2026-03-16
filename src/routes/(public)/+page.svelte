@@ -110,8 +110,10 @@
 <section class="border-t pt-8 mt-4 pb-10">
   <div class="flex flex-wrap gap-8 justify-center text-center">
     <div>
-      <div class="text-2xl font-bold">v0.1</div>
-      <div class="text-xs text-muted-foreground mt-1">Constitution</div>
+      <a href="/constitution" class="hover:underline underline-offset-4">
+        <div class="text-2xl font-bold">{data.constitutionVersion ? `v${data.constitutionVersion}` : '—'}</div>
+        <div class="text-xs text-muted-foreground mt-1">Constitution</div>
+      </a>
     </div>
     <div>
       <div class="text-2xl font-bold">MVP</div>

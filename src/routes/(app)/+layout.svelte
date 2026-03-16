@@ -8,35 +8,15 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import { Button } from '$lib/components/ui/button'
   import { Separator } from '$lib/components/ui/separator'
-  import {
-    LayoutDashboard,
-    FileText,
-    Vote,
-    Wallet,
-    IdCard,
-    Activity,
-    Settings2,
-    Users,
-    LogOut,
-    Earth,
-    type Icon
-  } from '@lucide/svelte'
-  import type { Component } from 'svelte'
+  import NavMenu from '$lib/components/nav-menu.svelte'
+  import AdminNavMenu from '$lib/components/admin-nav-menu.svelte'
+  import { LogOut, Earth } from '@lucide/svelte'
 
   let { children } = $props()
 
   const session = useSession()
 
   const user = $derived($session.data?.user as AppUser | undefined)
-
-  const navItems: { href: string; label: string; icon: Component<Icon> }[] = [
-    { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-    { href: '/proposals', label: 'Proposals', icon: FileText },
-    { href: '/votes', label: 'Votes', icon: Vote },
-    { href: '/budget', label: 'Budget', icon: Wallet },
-    { href: '/citizenship', label: 'Citizenship', icon: IdCard },
-    { href: '/activity', label: 'Activity', icon: Activity }
-  ]
 
   const isAdmin = $derived(user?.role === 'ADMIN')
 
@@ -47,8 +27,10 @@
     '/budget': 'Budget',
     '/citizenship': 'Citizenship',
     '/activity': 'Activity',
+    '/documents': 'Documents',
     '/admin': 'Admin',
     '/admin/users': 'User Management',
+    '/admin/documents': 'Documents',
     '/settings/profile': 'Profile Settings',
     '/settings/security': 'Security & Privacy'
   }
@@ -92,23 +74,7 @@
       <Sidebar.Group>
         <Sidebar.GroupLabel>Navigation</Sidebar.GroupLabel>
         <Sidebar.GroupContent>
-          <Sidebar.Menu>
-            {#each navItems as item}
-              <Sidebar.MenuItem>
-                <Sidebar.MenuButton
-                  isActive={page.url.pathname === item.href}
-                  tooltipContent={item.label}
-                >
-                  {#snippet child({ props })}
-                    <a href={item.href} {...props}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </a>
-                  {/snippet}
-                </Sidebar.MenuButton>
-              </Sidebar.MenuItem>
-            {/each}
-          </Sidebar.Menu>
+          <NavMenu />
         </Sidebar.GroupContent>
       </Sidebar.Group>
 
@@ -116,34 +82,7 @@
         <Sidebar.Group>
           <Sidebar.GroupLabel>Admin</Sidebar.GroupLabel>
           <Sidebar.GroupContent>
-            <Sidebar.Menu>
-              <Sidebar.MenuItem>
-                <Sidebar.MenuButton
-                  isActive={page.url.pathname === '/admin'}
-                  tooltipContent="Admin"
-                >
-                  {#snippet child({ props })}
-                    <a href="/admin" {...props}>
-                      <Settings2 />
-                      <span>Admin</span>
-                    </a>
-                  {/snippet}
-                </Sidebar.MenuButton>
-              </Sidebar.MenuItem>
-              <Sidebar.MenuItem>
-                <Sidebar.MenuButton
-                  isActive={page.url.pathname.startsWith('/admin/users')}
-                  tooltipContent="Users"
-                >
-                  {#snippet child({ props })}
-                    <a href="/admin/users" {...props}>
-                      <Users />
-                      <span>Users</span>
-                    </a>
-                  {/snippet}
-                </Sidebar.MenuButton>
-              </Sidebar.MenuItem>
-            </Sidebar.Menu>
+            <AdminNavMenu />
           </Sidebar.GroupContent>
         </Sidebar.Group>
       {/if}

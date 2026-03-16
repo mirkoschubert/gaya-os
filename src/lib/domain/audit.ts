@@ -12,6 +12,7 @@ export type AuditAction =
   | 'VOTE_CAST'
   | 'DELEGATION_CREATED'
   | 'DOCUMENT_VERSION_CREATED'
+  | 'DOCUMENT_DELETED'
   | 'ROLE_CHANGED'
   | 'EMAIL_VERIFIED'
   | 'COUNCIL_DECISION'
@@ -28,6 +29,7 @@ export const ACTION_LABELS: Record<AuditAction, string> = {
   VOTE_CAST: 'cast a vote',
   DELEGATION_CREATED: 'set up a delegation',
   DOCUMENT_VERSION_CREATED: 'published a document version',
+  DOCUMENT_DELETED: 'deleted a document',
   ROLE_CHANGED: 'had their role changed',
   EMAIL_VERIFIED: 'had their email verified',
   COUNCIL_DECISION: 'made a council decision',
@@ -43,6 +45,7 @@ export const ACTION_OPTIONS: { value: AuditAction | ''; label: string }[] = [
   { value: 'PROPOSAL_CREATED', label: 'Proposal created' },
   { value: 'COMMENT_CREATED', label: 'Comment created' },
   { value: 'VOTE_CAST', label: 'Vote cast' },
+  { value: 'DOCUMENT_VERSION_CREATED', label: 'Document version published' },
   { value: 'ROLE_CHANGED', label: 'Role changed' }
 ]
 
@@ -74,9 +77,16 @@ export function displayHandle(user: ActivityUser): string {
   return user.username ? `@${user.username}` : user.name
 }
 
-export function entityLink(type: string | null, id: string | null): string | null {
+export function entityLink(
+  type: string | null,
+  id: string | null,
+  metadata?: unknown
+): string | null {
   if (!type || !id) return null
   if (type === 'PROPOSAL') return `/proposals/${id}`
-  if (type === 'DOCUMENT') return `/constitution`
+  if (type === 'DOCUMENT') {
+    const slug = (metadata as { documentSlug?: string })?.documentSlug
+    return slug ? `/documents/${slug}` : `/documents`
+  }
   return null
 }

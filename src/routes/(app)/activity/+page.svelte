@@ -148,9 +148,9 @@
               {ACTION_LABELS[entry.action] ?? entry.action}
             </Table.Cell>
             <Table.Cell>
-              {#if entityLink(entry.entityType, entry.entityId)}
+              {#if entityLink(entry.entityType, entry.entityId, entry.metadata)}
                 <a
-                  href={entityLink(entry.entityType, entry.entityId)}
+                  href={entityLink(entry.entityType, entry.entityId, entry.metadata)}
                   class="text-primary text-sm underline-offset-4 hover:underline"
                 >
                   view →
