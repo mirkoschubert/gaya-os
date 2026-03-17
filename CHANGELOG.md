@@ -5,6 +5,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.3.0] – 2026-03-17
+
+### Added
+- Citizen directory (`/citizens`) and public profiles (`/citizens/[username]`) with hero banner, avatar, bio, links and activity tab
+- Avatar and banner upload via Vercel Blob with immediate preview update
+- New citizen ID format `CX-ZZZZZZZZZZZZ` with admin migration action
+- Dynamic breadcrumbs in app header for all routes
+- "Community" sidebar group (Citizens, My Profile, ID Card / Citizenship) with role-aware visibility
+- Activity log redesigned as compact log-line sentences with inline code/link styling
+
+### Changed
+- Profile settings: two-column desktop layout, Visitor-only sections hidden for Visitors
+- `/citizenship` renamed to `/id-card`
+
+---
+
 ## [0.2.1] – 2026-03-17
 
 ### Added
