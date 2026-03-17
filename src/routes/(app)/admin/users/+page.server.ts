@@ -5,16 +5,17 @@ import { sendVerificationEmail } from '$lib/server/email'
 import { createEmailVerificationToken } from 'better-auth/api'
 import { auth } from '$lib/server/auth'
 import { getBaseUrl } from '$lib/url'
+import { hasCapability } from '$lib/server/services/roles'
 import type { PageServerLoad, Actions } from './$types'
 
 export const load: PageServerLoad = async ({ locals }) => {
-  if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+  if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users'))) error(403, 'Forbidden')
   return { users: await listUsers() }
 }
 
 export const actions: Actions = {
   setRole: async ({ locals, request }) => {
-    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users'))) error(403, 'Forbidden')
     const data = await request.formData()
     const userId = data.get('userId') as string
     const role = data.get('role') as 'USER' | 'MODERATOR' | 'ADMIN'
@@ -29,7 +30,7 @@ export const actions: Actions = {
   },
 
   verifyEmail: async ({ locals, request }) => {
-    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users'))) error(403, 'Forbidden')
     const data = await request.formData()
     const userId = data.get('userId') as string
     if (!userId) return fail(400, { message: 'Missing userId.' })
@@ -38,7 +39,7 @@ export const actions: Actions = {
   },
 
   resendVerification: async ({ locals, request }) => {
-    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users'))) error(403, 'Forbidden')
     const data = await request.formData()
     const email = data.get('email') as string
     if (!email) return fail(400, { message: 'Missing email.' })
@@ -56,13 +57,13 @@ export const actions: Actions = {
   },
 
   migrateCitizenIds: async ({ locals }) => {
-    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users'))) error(403, 'Forbidden')
     const count = await migrateOldCitizenIds()
     return { success: true, migratedCount: count }
   },
 
   deleteUser: async ({ locals, request }) => {
-    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users'))) error(403, 'Forbidden')
     const data = await request.formData()
     const userId = data.get('userId') as string
     if (!userId) return fail(400, { message: 'Missing userId.' })

@@ -38,6 +38,8 @@
     '/citizens': [{ label: 'Citizens' }],
     '/admin': [{ label: 'Admin' }],
     '/admin/users': [{ label: 'Admin', href: '/admin' }, { label: 'User Management' }],
+    '/admin/roles': [{ label: 'Admin', href: '/admin' }, { label: 'Roles & Permissions' }],
+    '/admin/governance': [{ label: 'Admin', href: '/admin' }, { label: 'Governance Settings' }],
     '/admin/documents': [{ label: 'Admin', href: '/admin' }, { label: 'Documents' }],
     '/admin/documents/new': [{ label: 'Admin', href: '/admin' }, { label: 'Documents', href: '/admin/documents' }, { label: 'New' }],
     '/settings/profile': [{ label: 'Settings' }, { label: 'Profile' }],

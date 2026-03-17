@@ -10,14 +10,16 @@
   const session = useSession()
   const user = $derived($session.data?.user as AppUser | undefined)
 
-  const isCitizen = $derived(user?.civicStatus === 'CITIZEN')
+  const caps = $derived((page.data as { caps?: Record<string, boolean> }).caps ?? {})
+  const hasProfile = $derived(caps['has_profile'] ?? false)
+  const canApplyCitizenship = $derived(caps['can_apply_citizenship'] ?? false)
 
   const navItems = $derived<{ href: string; label: string; icon: Component<Icon> }[]>([
     { href: '/citizens', label: 'Citizens', icon: Users },
-    ...(isCitizen && user?.username
+    ...(hasProfile && user?.username
       ? [{ href: `/citizens/${user.username}`, label: 'My Profile', icon: UserRound }]
       : []),
-    { href: '/id-card', label: isCitizen ? 'ID Card' : 'Citizenship', icon: IdCard }
+    { href: '/id-card', label: canApplyCitizenship ? 'Citizenship' : 'ID Card', icon: IdCard }
   ])
 
   const sidebar = useSidebar()

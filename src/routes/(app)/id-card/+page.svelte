@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from '$app/state'
   import type { PageData, ActionData } from './$types'
   import * as Card from '$lib/components/ui/card'
   import { Button } from '$lib/components/ui/button'
@@ -7,11 +8,14 @@
   let { data, form }: { data: PageData; form: ActionData } = $props()
 
   let constitutionAcknowledged = $state(false)
+
+  const caps = $derived((page.data as { caps?: Record<string, boolean> }).caps ?? {})
+  const canApplyCitizenship = $derived(caps['can_apply_citizenship'] ?? false)
 </script>
 
 <svelte:head><title>Citizenship · Gaya OS</title></svelte:head>
 
-{#if data.user?.civicStatus === 'CITIZEN'}
+{#if !canApplyCitizenship}
   <div class="max-w-md">
     <Card.Root>
       <Card.Header>

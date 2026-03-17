@@ -78,7 +78,7 @@
               <p class="truncate text-xs text-muted-foreground">@{citizen.username}</p>
             </div>
             <Badge variant="outline" class="font-mono text-xs">{citizen.citizenId}</Badge>
-            <p class="text-xs text-muted-foreground">Citizen since {formatDate(citizen.joinedAt)}</p>
+            {#if citizen.joinedAt}<p class="text-xs text-muted-foreground">Citizen since {formatDate(citizen.joinedAt)}</p>{/if}
             {#if citizen.id === currentUser?.id}
               <Badge variant="secondary" class="text-xs">You</Badge>
             {/if}

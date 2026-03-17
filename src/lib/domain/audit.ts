@@ -17,6 +17,7 @@ export type AuditAction =
   | 'EMAIL_VERIFIED'
   | 'COUNCIL_DECISION'
   | 'SYSTEM_SETTING_UPDATED'
+  | 'ROLE_CAPABILITY_UPDATED'
   | 'CITIZEN_ID_MIGRATED'
 
 // A log sentence is a list of segments — rendered inline.
@@ -36,7 +37,9 @@ export const ACTION_OPTIONS: { value: AuditAction | ''; label: string }[] = [
   { value: 'COMMENT_CREATED', label: 'Comment created' },
   { value: 'VOTE_CAST', label: 'Vote cast' },
   { value: 'DOCUMENT_VERSION_CREATED', label: 'Document version published' },
-  { value: 'ROLE_CHANGED', label: 'Role changed' }
+  { value: 'ROLE_CHANGED', label: 'Role changed' },
+  { value: 'SYSTEM_SETTING_UPDATED', label: 'Setting changed' },
+  { value: 'ROLE_CAPABILITY_UPDATED', label: 'Permission changed' }
 ]
 
 export interface ActivityUser {
@@ -190,14 +193,41 @@ export function buildLogSentence(entry: ActivityEntry): LogSegment[] {
     }
 
     case 'SYSTEM_SETTING_UPDATED': {
-      const key = m?.key ?? '?'
-      const value = m?.value ?? '?'
-      return [
+      const meta = entry.metadata as Record<string, unknown> | null | undefined
+      const key = (meta?.key as string) ?? '?'
+      const oldVal = meta?.oldValue !== undefined ? JSON.stringify(meta.oldValue) : null
+      const newVal = meta?.newValue !== undefined ? JSON.stringify(meta.newValue) : '?'
+      const segments: LogSegment[] = [
         { type: 'text', value: 'updated setting ' },
-        { type: 'code', value: key },
-        { type: 'text', value: ' to ' },
-        { type: 'code', value: value }
+        { type: 'code', value: key }
       ]
+      if (oldVal !== null) {
+        segments.push({ type: 'text', value: ' (was ' })
+        segments.push({ type: 'code', value: oldVal })
+        segments.push({ type: 'text', value: ')' })
+      }
+      segments.push({ type: 'text', value: ' to ' })
+      segments.push({ type: 'code', value: newVal })
+      return segments
+    }
+
+    case 'ROLE_CAPABILITY_UPDATED': {
+      const meta = entry.metadata as Record<string, unknown> | null | undefined
+      const role = (meta?.role as string) ?? '?'
+      const capability = (meta?.capability as string) ?? '?'
+      const oldValue = meta?.oldValue as boolean | undefined
+      const newValue = meta?.newValue as boolean | undefined
+      const changed = newValue === true ? 'granted' : 'revoked'
+      const segments: LogSegment[] = [
+        { type: 'text', value: `${changed} permission ` },
+        { type: 'code', value: capability },
+        { type: 'text', value: ' for ' },
+        { type: 'code', value: role }
+      ]
+      if (oldValue !== undefined && newValue !== undefined) {
+        segments.push({ type: 'text', value: ` (was ${oldValue}, now ${newValue})` })
+      }
+      return segments
     }
 
     default:

@@ -6,8 +6,8 @@ export interface CitizenSummary {
   username: string
   displayName: string
   avatarUrl: string | null
-  citizenId: string
-  joinedAt: Date
+  citizenId: string | null
+  joinedAt: Date | null
 }
 
 export interface CitizenProfile extends CitizenSummary {
@@ -83,7 +83,7 @@ export async function listCitizens(): Promise<CitizenSummary[]> {
  */
 export async function getCitizenByUsername(username: string): Promise<CitizenProfile | null> {
   const user = await prisma.user.findFirst({
-    where: { username, civicStatus: 'CITIZEN' },
+    where: { username },
     select: {
       id: true,
       firstName: true,
@@ -100,7 +100,7 @@ export async function getCitizenByUsername(username: string): Promise<CitizenPro
     }
   })
 
-  if (!user || !user.citizenId || !user.joinedAt) return null
+  if (!user) return null
 
   return {
     id: user.id,

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { authClient, useSession } from '$lib/auth-client'
+  import { page } from '$app/state'
   import type { AppUser, ProfileLink } from '$lib/domain/auth'
   import * as Card from '$lib/components/ui/card'
   import * as Avatar from '$lib/components/ui/avatar'
@@ -13,7 +14,8 @@
   const session = useSession()
 
   const user = $derived($session.data?.user as AppUser | undefined)
-  const isCitizen = $derived(user?.civicStatus === 'CITIZEN')
+  const caps = $derived((page.data as { caps?: Record<string, boolean> }).caps ?? {})
+  const canEditProfile = $derived(caps['can_edit_own_profile'] ?? false)
   const emailVerified = $derived(($session.data?.user as { emailVerified?: boolean } | undefined)?.emailVerified ?? true)
 
   // ─── Email verification ───
@@ -306,7 +308,7 @@
     </Card.Content>
   </Card.Root>
 
-  {#if isCitizen}
+  {#if canEditProfile}
   <!-- Profile Info -->
   <Card.Root>
     <Card.Header>

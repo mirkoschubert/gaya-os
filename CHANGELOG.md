@@ -5,6 +5,31 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.4.0] – 2026-03-17
+
+### Added
+- DB-backed permission matrix (`RoleCapability` table) — all role capabilities stored and editable in the DB
+- `SystemSetting` model for governance configuration (key/value JSON store with audit trail)
+- Admin: Roles & Permissions page (`/admin/roles`) — editable matrix with Switch toggles per role and capability group
+- Admin: Governance Settings page (`/admin/governance`) — tabbed UI for Council, Voting, Proposals and Engagement settings
+- `COUNCIL_MEMBER` row in the capability matrix with council-specific capabilities (can_view_council_dashboard, can_review_proposals, can_initiate_internal_vote, can_initiate_sanction_vote, can_manage_council)
+- `can_run_for_council` capability for Citizens, `can_manage_council` for Admins
+- Flat `caps` map in `page.data` — all capabilities computed server-side per user and available in every route
+- `hasCapability(user, capability)` server-side helper for API and action guards
+- Governance settings domain types (`GovernanceSettings`, `DEFAULT_GOVERNANCE_SETTINGS`, `SettingKey`)
+- Audit log entries for `SYSTEM_SETTING_UPDATED` and `ROLE_CAPABILITY_UPDATED` with old/new values
+
+### Changed
+- Permission model: `USER` role removed from matrix (default placeholder, no own capabilities); `MODERATOR` and `ADMIN` rows define only their extras — CITIZEN rights are merged via OR at runtime
+- `/citizens/[username]` profile page now accessible for all users (not Citizens only) — citizenId badge and "Citizen since" shown conditionally
+- All capability guards migrated from hardcoded `civicStatus === 'CITIZEN'` checks to dynamic `caps` / `hasCapability()` (settings/profile, community nav, citizen profile edit button, avatar/hero upload, id-card, admin/users)
+- Admin/users page guards use `can_manage_users` capability instead of hardcoded ADMIN role check
+
+### Fixed
+- Visitor profile page no longer returns 404 when has_profile is enabled for Visitors
+
+---
+
 ## [0.3.0] – 2026-03-17
 
 ### Added

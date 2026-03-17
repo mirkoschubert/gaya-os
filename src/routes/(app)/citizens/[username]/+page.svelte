@@ -1,5 +1,6 @@
 <script lang="ts">
   import { useSession } from '$lib/auth-client'
+  import { page } from '$app/state'
   import type { AppUser } from '$lib/domain/auth'
   import * as Avatar from '$lib/components/ui/avatar'
   import * as Tabs from '$lib/components/ui/tabs'
@@ -15,6 +16,8 @@
   const session = useSession()
   const currentUser = $derived($session.data?.user as AppUser | undefined)
   const isOwnProfile = $derived(currentUser?.id === data.citizen.id)
+  const caps = $derived((page.data as { caps?: Record<string, boolean> }).caps ?? {})
+  const canEditOwnProfile = $derived(caps['can_edit_own_profile'] ?? false)
 
   function formatTimestamp(d: Date | string): string {
     return new Date(d).toLocaleString('en-GB', {
@@ -55,7 +58,7 @@
     class="flex h-64 w-full items-end justify-end p-3 bg-linear-to-br from-primary/20 to-primary/5"
     style={data.citizen.heroUrl ? `background-image: url('${data.citizen.heroUrl}'); background-size: cover; background-position: center;` : ''}
   >
-    {#if isOwnProfile}
+    {#if isOwnProfile && canEditOwnProfile}
       <Button variant="secondary" size="sm" href="/settings/profile">
         <Pencil class="size-3.5" />
         Edit Profile
@@ -78,7 +81,9 @@
     <div class="mb-4">
       <div class="flex flex-wrap items-center gap-2">
         <h1 class="text-2xl font-bold leading-tight">{data.citizen.displayName}</h1>
-        <Badge variant="outline" class="font-mono text-xs">{data.citizen.citizenId}</Badge>
+        {#if data.citizen.citizenId}
+          <Badge variant="outline" class="font-mono text-xs">{data.citizen.citizenId}</Badge>
+        {/if}
       </div>
       <p class="text-muted-foreground text-sm">@{data.citizen.username}</p>
     </div>
@@ -91,10 +96,12 @@
           {data.citizen.location}
         </span>
       {/if}
-      <span class="flex items-center gap-1">
-        <Calendar class="size-3.5" />
-        Citizen since {formatDate(data.citizen.joinedAt)}
-      </span>
+      {#if data.citizen.joinedAt}
+        <span class="flex items-center gap-1">
+          <Calendar class="size-3.5" />
+          Citizen since {formatDate(data.citizen.joinedAt)}
+        </span>
+      {/if}
     </div>
 
     <!-- Bio -->

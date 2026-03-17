@@ -1,6 +1,7 @@
 import { error, json } from '@sveltejs/kit'
 import { put } from '@vercel/blob'
 import { prisma } from '$lib/server/prisma'
+import { hasCapability } from '$lib/server/services/roles'
 import { BLOB_READ_WRITE_TOKEN } from '$env/static/private'
 import type { RequestHandler } from './$types'
 
@@ -9,6 +10,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   if (!locals.user) error(401, 'Unauthorized')
+  if (!(await hasCapability(locals.user, 'can_edit_own_profile'))) error(403, 'Forbidden')
 
   const formData = await request.formData()
   const file = formData.get('file')
