@@ -1,6 +1,11 @@
 export type UserRole = 'USER' | 'MODERATOR' | 'ADMIN'
 export type CivicStatus = 'VISITOR' | 'CITIZEN'
 
+export interface ProfileLink {
+  label: string
+  url: string
+}
+
 export interface AppUser {
   id: string
   email: string
@@ -14,4 +19,11 @@ export interface AppUser {
   citizenId: string | null
   joinedAt: Date | null
   createdAt: Date
+  // Profile fields
+  bio: string | null
+  location: string | null
+  links: ProfileLink[] | null
+  avatarUrl: string | null
+  heroUrl: string | null
+  showRealName: boolean
 }

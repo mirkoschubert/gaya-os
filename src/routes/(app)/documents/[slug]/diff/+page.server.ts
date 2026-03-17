@@ -10,8 +10,14 @@ export const load: PageServerLoad = async ({ params, url }) => {
   const document = await getDocumentBySlug(params.slug)
   if (!document) error(404, 'Document not found')
 
+  const breadcrumbs = [
+    { label: 'Documents', href: '/documents' },
+    { label: document.title, href: `/documents/${params.slug}` },
+    { label: 'Diff' }
+  ]
+
   if (!fromParam || !toParam) {
-    return { document, fromVersion: null, toVersion: null }
+    return { document, fromVersion: null, toVersion: null, breadcrumbs }
   }
 
   if (!isValidVersionLabel(fromParam) || !isValidVersionLabel(toParam)) {
@@ -26,5 +32,5 @@ export const load: PageServerLoad = async ({ params, url }) => {
   if (!fromVersion) error(404, `Version ${fromParam} not found`)
   if (!toVersion) error(404, `Version ${toParam} not found`)
 
-  return { document, fromVersion, toVersion }
+  return { document, fromVersion, toVersion, breadcrumbs }
 }

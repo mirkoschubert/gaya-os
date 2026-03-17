@@ -7,5 +7,13 @@ export const load: PageServerLoad = async ({ params }) => {
   if (!document) error(404, 'Document not found')
 
   const versions = await listDocumentVersions(document.id)
-  return { document, versions }
+  return {
+    document,
+    versions,
+    breadcrumbs: [
+      { label: 'Documents', href: '/documents' },
+      { label: document.title, href: `/documents/${params.slug}` },
+      { label: 'History' }
+    ]
+  }
 }

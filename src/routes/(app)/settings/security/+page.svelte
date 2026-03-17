@@ -92,7 +92,7 @@
   </Dialog.Content>
 </Dialog.Root>
 
-<div class="max-w-lg space-y-6">
+<div class="grid gap-6 lg:grid-cols-2">
   <Card.Root>
     <Card.Header>
       <Card.Title>Passkeys</Card.Title>
@@ -147,8 +147,6 @@
       </form>
     </Card.Content>
   </Card.Root>
-
-  <Separator />
 
   <Card.Root>
     <Card.Header>

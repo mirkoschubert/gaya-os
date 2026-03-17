@@ -16,7 +16,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   if (!document) error(404, 'Document not found')
 
   const versions = await listDocumentVersions(document.id)
-  return { document, versions }
+  return {
+    document,
+    versions,
+    breadcrumbs: [
+      { label: 'Admin', href: '/admin' },
+      { label: 'Documents', href: '/admin/documents' },
+      { label: document.title }
+    ]
+  }
 }
 
 export const actions: Actions = {

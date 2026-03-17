@@ -191,7 +191,7 @@ export async function publishDocumentVersion(
 ): Promise<void> {
   const doc = await prisma.document.findUniqueOrThrow({
     where: { id: documentId },
-    select: { slug: true }
+    select: { slug: true, title: true }
   })
 
   const targetVersion = await prisma.documentVersion.findUniqueOrThrow({
@@ -217,6 +217,7 @@ export async function publishDocumentVersion(
     entityId: documentId,
     metadata: {
       documentSlug: doc.slug,
+      documentTitle: doc.title,
       versionId,
       versionLabel: targetVersion.versionLabel
     }

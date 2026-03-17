@@ -1,12 +1,10 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
   import * as Card from '$lib/components/ui/card'
-  import * as Table from '$lib/components/ui/table'
   import * as Select from '$lib/components/ui/select'
-  import { Badge } from '$lib/components/ui/badge'
   import { Button } from '$lib/components/ui/button'
   import { Separator } from '$lib/components/ui/separator'
-  import { ACTION_LABELS, ACTION_OPTIONS, displayHandle, entityLink } from '$lib/domain/audit'
+  import { ACTION_OPTIONS, buildLogSentence, displayHandle, formatRoles } from '$lib/domain/audit'
   import type { PageData } from './$types'
 
   let { data }: { data: PageData } = $props()
@@ -40,16 +38,6 @@
     const params = filterParams()
     if (data.prevCursor) params.set('prev', data.prevCursor)
     return `?${params.toString()}`
-  }
-
-  function roleBadgeVariant(role: string): 'destructive' | 'secondary' | 'outline' {
-    if (role === 'ADMIN') return 'destructive'
-    if (role === 'MODERATOR') return 'secondary'
-    return 'outline'
-  }
-
-  function civicBadgeVariant(status: string): 'default' | 'outline' {
-    return status === 'CITIZEN' ? 'default' : 'outline'
   }
 
   function formatTimestamp(d: Date | string): string {
@@ -107,60 +95,40 @@
       <p class="text-muted-foreground text-sm py-4">No entries found.</p>
     </Card.Content>
   {:else}
-    <Table.Root>
-      <Table.Header>
-        <Table.Row>
-          <Table.Head class="w-40">Timestamp</Table.Head>
-          <Table.Head class="w-36">User</Table.Head>
-          <Table.Head>Action</Table.Head>
-          <Table.Head class="w-20"></Table.Head>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {#each data.entries as entry}
-          <Table.Row>
-            <Table.Cell class="text-muted-foreground text-sm whitespace-nowrap">
-              {formatTimestamp(entry.createdAt)}
-            </Table.Cell>
-            <Table.Cell>
-              {#if entry.user}
-                <div class="flex flex-wrap items-center gap-1">
-                  <a
-                    href="?user={entry.user.id}"
-                    class="text-sm font-medium hover:underline underline-offset-4"
-                  >
-                    {displayHandle(entry.user)}
-                  </a>
-                  <Badge variant={civicBadgeVariant(entry.user.civicStatus)} class="text-xs px-1.5 py-0">
-                    {entry.user.civicStatus}
-                  </Badge>
-                  {#if entry.user.role !== 'USER'}
-                    <Badge variant={roleBadgeVariant(entry.user.role)} class="text-xs px-1.5 py-0">
-                      {entry.user.role}
-                    </Badge>
-                  {/if}
-                </div>
-              {:else}
-                <span class="text-muted-foreground text-sm">System</span>
+    <ul class="divide-y">
+      {#each data.entries as entry}
+        <li class="flex flex-col gap-0.5 px-6 py-3 sm:flex-row sm:items-baseline sm:gap-3">
+          <!-- Timestamp -->
+          <span class="text-muted-foreground w-40 shrink-0 font-mono text-xs">
+            {formatTimestamp(entry.createdAt)}
+          </span>
+
+          <!-- Log sentence -->
+          <span class="text-sm leading-relaxed">
+            {#if entry.user}
+              <a
+                href="?user={entry.user.id}"
+                class="font-medium hover:underline underline-offset-4"
+              >{displayHandle(entry.user)}</a>
+              <span class="text-muted-foreground text-xs"> ({formatRoles(entry.user)})</span>
+            {:else}
+              <span class="text-muted-foreground">System</span>
+            {/if}
+            {#each buildLogSentence(entry) as seg}
+              {#if seg.type === 'text'}
+                {seg.value}
+              {:else if seg.type === 'code'}
+                <span class="bg-muted rounded px-1.5 py-0.5 font-mono text-xs">{seg.value}</span>
+              {:else if seg.type === 'link'}
+                <a href={seg.href} class="bg-muted text-primary rounded px-1.5 py-0.5 underline underline-offset-2 decoration-primary/40 hover:decoration-primary transition-colors">{seg.value}</a>
+              {:else if seg.type === 'code-link'}
+                <a href={seg.href} class="bg-muted text-primary rounded px-1.5 py-0.5 font-mono text-xs underline underline-offset-2 decoration-primary/40 hover:decoration-primary transition-colors">{seg.value}</a>
               {/if}
-            </Table.Cell>
-            <Table.Cell class="text-sm">
-              {ACTION_LABELS[entry.action] ?? entry.action}
-            </Table.Cell>
-            <Table.Cell>
-              {#if entityLink(entry.entityType, entry.entityId, entry.metadata)}
-                <a
-                  href={entityLink(entry.entityType, entry.entityId, entry.metadata)}
-                  class="text-primary text-sm underline-offset-4 hover:underline"
-                >
-                  view →
-                </a>
-              {/if}
-            </Table.Cell>
-          </Table.Row>
-        {/each}
-      </Table.Body>
-    </Table.Root>
+            {/each}
+          </span>
+        </li>
+      {/each}
+    </ul>
   {/if}
 
   {#if data.prevCursor || data.nextCursor}

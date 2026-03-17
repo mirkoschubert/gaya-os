@@ -18,6 +18,6 @@ export const actions: Actions = {
       return fail(400, { error: message })
     }
 
-    redirect(302, '/citizenship')
+    redirect(302, '/id-card')
   }
 }

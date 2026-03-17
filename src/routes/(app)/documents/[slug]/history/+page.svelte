@@ -37,13 +37,6 @@
 </svelte:head>
 
 <div class="mb-6">
-  <div class="flex flex-wrap items-center gap-2 mb-1">
-    <a href="/documents" class="text-muted-foreground text-sm hover:underline underline-offset-4">Documents</a>
-    <span class="text-muted-foreground text-sm">/</span>
-    <a href={base} class="text-muted-foreground text-sm hover:underline underline-offset-4">{data.document.title}</a>
-    <span class="text-muted-foreground text-sm">/</span>
-    <span class="text-sm font-medium">History</span>
-  </div>
   <div class="flex flex-wrap items-start justify-between gap-3">
     <h1 class="text-3xl font-bold tracking-tight">{data.document.title}</h1>
     <Badge variant="secondary">{DOCUMENT_TYPE_LABELS[data.document.type]}</Badge>

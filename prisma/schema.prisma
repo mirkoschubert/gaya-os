@@ -282,6 +282,13 @@ model user {
   citizenId   String?   @unique
   joinedAt    DateTime?
   lastLogin   DateTime?
+  // Profile additionalFields
+  bio         String?
+  location    String?
+  links       Json?
+  avatarUrl   String?
+  heroUrl     String?
+  showRealName Boolean  @default(true)
 
   sessions         session[]
   accounts         account[]

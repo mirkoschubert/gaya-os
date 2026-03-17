@@ -8,9 +8,11 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import { Button } from '$lib/components/ui/button'
   import { Separator } from '$lib/components/ui/separator'
-  import NavMenu from '$lib/components/nav-menu.svelte'
-  import AdminNavMenu from '$lib/components/admin-nav-menu.svelte'
+  import NavMenu from '$lib/components/app/nav-menu.svelte'
+  import AdminNavMenu from '$lib/components/app/admin-nav-menu.svelte'
+  import CommunityNavMenu from '$lib/components/app/community-nav-menu.svelte'
   import { LogOut, Earth } from '@lucide/svelte'
+  import AppBreadcrumb from '$lib/components/app/breadcrumb.svelte'
 
   let { children } = $props()
 
@@ -20,21 +22,35 @@
 
   const isAdmin = $derived(user?.role === 'ADMIN')
 
-  const titles: Record<string, string> = {
-    '/dashboard': 'Overview',
-    '/proposals': 'Proposals',
-    '/votes': 'Votes',
-    '/budget': 'Budget',
-    '/citizenship': 'Citizenship',
-    '/activity': 'Activity',
-    '/documents': 'Documents',
-    '/admin': 'Admin',
-    '/admin/users': 'User Management',
-    '/admin/documents': 'Documents',
-    '/settings/profile': 'Profile Settings',
-    '/settings/security': 'Security & Privacy'
+  interface BreadcrumbItem {
+    label: string
+    href?: string
   }
-  const title = $derived(titles[page.url.pathname] ?? '')
+
+  const staticBreadcrumbs: Record<string, BreadcrumbItem[]> = {
+    '/dashboard': [{ label: 'Overview' }],
+    '/proposals': [{ label: 'Proposals' }],
+    '/votes': [{ label: 'Votes' }],
+    '/budget': [{ label: 'Budget' }],
+    '/id-card': [{ label: 'ID Card' }],
+    '/activity': [{ label: 'Activity' }],
+    '/documents': [{ label: 'Documents' }],
+    '/citizens': [{ label: 'Citizens' }],
+    '/admin': [{ label: 'Admin' }],
+    '/admin/users': [{ label: 'Admin', href: '/admin' }, { label: 'User Management' }],
+    '/admin/documents': [{ label: 'Admin', href: '/admin' }, { label: 'Documents' }],
+    '/admin/documents/new': [{ label: 'Admin', href: '/admin' }, { label: 'Documents', href: '/admin/documents' }, { label: 'New' }],
+    '/settings/profile': [{ label: 'Settings' }, { label: 'Profile' }],
+    '/settings/security': [{ label: 'Settings' }, { label: 'Security & Privacy' }]
+  }
+
+  // Use breadcrumbs from page data if provided by the route's load function,
+  // otherwise fall back to static mapping
+  const breadcrumbs = $derived(
+    (page.data as { breadcrumbs?: BreadcrumbItem[] }).breadcrumbs ??
+    staticBreadcrumbs[page.url.pathname] ??
+    []
+  )
 
   // Avatar initial: prefer firstName, fall back to name
   const userInitial = $derived(
@@ -78,6 +94,13 @@
         </Sidebar.GroupContent>
       </Sidebar.Group>
 
+      <Sidebar.Group>
+        <Sidebar.GroupLabel>Community</Sidebar.GroupLabel>
+        <Sidebar.GroupContent>
+          <CommunityNavMenu />
+        </Sidebar.GroupContent>
+      </Sidebar.Group>
+
       {#if isAdmin}
         <Sidebar.Group>
           <Sidebar.GroupLabel>Admin</Sidebar.GroupLabel>
@@ -96,6 +119,9 @@
               {#snippet child({ props })}
                 <DropdownMenu.Trigger {...props}>
                   <Avatar.Root class="size-8 rounded-full shrink-0">
+                    {#if user?.avatarUrl}
+                      <Avatar.Image src={user.avatarUrl} alt={user.name} />
+                    {/if}
                     <Avatar.Fallback>{userInitial}</Avatar.Fallback>
                   </Avatar.Root>
                   <div class="grid flex-1 text-left text-sm leading-tight">
@@ -136,7 +162,9 @@
     <header class="flex h-14 shrink-0 items-center gap-2 border-b px-4">
       <Sidebar.Trigger class="-ml-1" />
       <Separator orientation="vertical" class="h-4" />
-      <span class="text-sm font-medium">{title}</span>
+      {#if breadcrumbs.length > 0}
+        <AppBreadcrumb items={breadcrumbs} />
+      {/if}
       <div class="ml-auto flex items-center gap-2">
         <Button variant="ghost" size="sm" onclick={handleSignOut}>
           <LogOut class="size-4" />

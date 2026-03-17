@@ -1,5 +1,6 @@
 import { error, fail } from '@sveltejs/kit'
 import { listUsers, setUserRole, setEmailVerified, deleteUser } from '$lib/server/services/users'
+import { migrateOldCitizenIds } from '$lib/server/services/citizenship'
 import { sendVerificationEmail } from '$lib/server/email'
 import { createEmailVerificationToken } from 'better-auth/api'
 import { auth } from '$lib/server/auth'
@@ -52,6 +53,12 @@ export const actions: Actions = {
       const message = e instanceof Error ? e.message : 'Unknown error'
       return fail(500, { message: `Resend error: ${message}` })
     }
+  },
+
+  migrateCitizenIds: async ({ locals }) => {
+    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    const count = await migrateOldCitizenIds()
+    return { success: true, migratedCount: count }
   },
 
   deleteUser: async ({ locals, request }) => {

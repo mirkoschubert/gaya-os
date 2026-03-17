@@ -7,7 +7,6 @@
     FileText,
     Vote,
     Wallet,
-    IdCard,
     Activity,
     BookOpen,
     type Icon
@@ -20,7 +19,6 @@
     { href: '/proposals', label: 'Proposals', icon: FileText },
     { href: '/votes', label: 'Votes', icon: Vote },
     { href: '/budget', label: 'Budget', icon: Wallet },
-    { href: '/citizenship', label: 'Citizenship', icon: IdCard },
     { href: '/activity', label: 'Activity', icon: Activity }
   ]
 

@@ -17,24 +17,14 @@ export type AuditAction =
   | 'EMAIL_VERIFIED'
   | 'COUNCIL_DECISION'
   | 'SYSTEM_SETTING_UPDATED'
+  | 'CITIZEN_ID_MIGRATED'
 
-export const ACTION_LABELS: Record<AuditAction, string> = {
-  USER_REGISTERED: 'registered',
-  USER_LOGGED_IN: 'logged in',
-  USER_LOGGED_OUT: 'logged out',
-  CITIZENSHIP_GRANTED: 'was granted citizenship',
-  PROPOSAL_CREATED: 'created a proposal',
-  PROPOSAL_SUPPORT_ADDED: 'supported a proposal',
-  COMMENT_CREATED: 'commented on a proposal',
-  VOTE_CAST: 'cast a vote',
-  DELEGATION_CREATED: 'set up a delegation',
-  DOCUMENT_VERSION_CREATED: 'published a document version',
-  DOCUMENT_DELETED: 'deleted a document',
-  ROLE_CHANGED: 'had their role changed',
-  EMAIL_VERIFIED: 'had their email verified',
-  COUNCIL_DECISION: 'made a council decision',
-  SYSTEM_SETTING_UPDATED: 'updated a system setting'
-}
+// A log sentence is a list of segments — rendered inline.
+export type LogSegment =
+  | { type: 'text'; value: string }
+  | { type: 'code'; value: string }
+  | { type: 'link'; value: string; href: string }
+  | { type: 'code-link'; value: string; href: string }
 
 export const ACTION_OPTIONS: { value: AuditAction | ''; label: string }[] = [
   { value: '', label: 'All actions' },
@@ -69,24 +59,148 @@ export interface ActivityEntry {
 
 export interface ActivityPage {
   entries: ActivityEntry[]
-  nextCursor: string | null  // id of last entry, null = no more pages
-  prevCursor: string | null  // id to go back, null = already at start
+  nextCursor: string | null
+  prevCursor: string | null
 }
 
 export function displayHandle(user: ActivityUser): string {
   return user.username ? `@${user.username}` : user.name
 }
 
-export function entityLink(
-  type: string | null,
-  id: string | null,
-  metadata?: unknown
-): string | null {
-  if (!type || !id) return null
-  if (type === 'PROPOSAL') return `/proposals/${id}`
-  if (type === 'DOCUMENT') {
-    const slug = (metadata as { documentSlug?: string })?.documentSlug
-    return slug ? `/documents/${slug}` : `/documents`
+export function formatRoles(user: ActivityUser): string {
+  const parts: string[] = [user.civicStatus]
+  if (user.role !== 'USER') parts.push(user.role)
+  return parts.join(', ')
+}
+
+/**
+ * Builds a log sentence as an array of typed segments.
+ * The actor (@username) is NOT included — callers render it separately.
+ */
+export function buildLogSentence(entry: ActivityEntry): LogSegment[] {
+  const m = entry.metadata as Record<string, string> | null | undefined
+
+  switch (entry.action) {
+    case 'USER_REGISTERED':
+      return [{ type: 'text', value: 'registered an account' }]
+
+    case 'USER_LOGGED_IN':
+      return [{ type: 'text', value: 'logged in' }]
+
+    case 'USER_LOGGED_OUT':
+      return [{ type: 'text', value: 'logged out' }]
+
+    case 'EMAIL_VERIFIED':
+      return [{ type: 'text', value: 'verified their email address' }]
+
+    case 'CITIZENSHIP_GRANTED':
+      return [
+        { type: 'text', value: 'was granted citizenship — ID ' },
+        { type: 'code', value: m?.citizenId ?? '?' }
+      ]
+
+    case 'CITIZEN_ID_MIGRATED':
+      return [
+        { type: 'text', value: 'citizen ID migrated to ' },
+        { type: 'code', value: m?.newId ?? '?' }
+      ]
+
+    case 'ROLE_CHANGED':
+      return [
+        { type: 'text', value: 'role changed to ' },
+        { type: 'code', value: m?.newRole ?? '?' }
+      ]
+
+    case 'PROPOSAL_CREATED': {
+      const title = m?.title ?? 'Untitled'
+      const href = entry.entityId ? `/proposals/${entry.entityId}` : null
+      return href
+        ? [{ type: 'text', value: 'created proposal ' }, { type: 'code-link', value: title, href }]
+        : [{ type: 'text', value: 'created proposal ' }, { type: 'code', value: title }]
+    }
+
+    case 'PROPOSAL_SUPPORT_ADDED': {
+      const title = m?.title ?? 'a proposal'
+      const href = entry.entityId ? `/proposals/${entry.entityId}` : null
+      return href
+        ? [{ type: 'text', value: 'supported proposal ' }, { type: 'code-link', value: title, href }]
+        : [{ type: 'text', value: 'supported proposal ' }, { type: 'code', value: title }]
+    }
+
+    case 'COMMENT_CREATED': {
+      const title = m?.proposalTitle ?? 'a proposal'
+      const href = m?.proposalId ? `/proposals/${m.proposalId}` : null
+      return href
+        ? [{ type: 'text', value: 'commented on ' }, { type: 'code-link', value: title, href }]
+        : [{ type: 'text', value: 'commented on ' }, { type: 'code', value: title }]
+    }
+
+    case 'VOTE_CAST': {
+      const title = m?.proposalTitle ?? 'a vote session'
+      const href = m?.voteSessionId ? `/votes/${m.voteSessionId}` : null
+      const choice = m?.choice ? ` (${m.choice})` : ''
+      return href
+        ? [{ type: 'text', value: `cast a vote${choice} on ` }, { type: 'code-link', value: title, href }]
+        : [{ type: 'text', value: `cast a vote${choice} on ` }, { type: 'code', value: title }]
+    }
+
+    case 'DELEGATION_CREATED': {
+      const category = m?.category ?? 'GLOBAL'
+      const delegateName = m?.delegateName ?? '?'
+      return [
+        { type: 'text', value: 'set up a ' },
+        { type: 'code', value: category },
+        { type: 'text', value: ' delegation to ' },
+        { type: 'code', value: delegateName }
+      ]
+    }
+
+    case 'DOCUMENT_VERSION_CREATED': {
+      const docTitle = m?.documentTitle ?? m?.documentSlug ?? 'a document'
+      const versionLabel = m?.versionLabel ?? null
+      const docSlug = m?.documentSlug
+      const docHref = docSlug ? `/documents/${docSlug}` : null
+      const diffHref = docSlug && versionLabel ? `/documents/${docSlug}/history` : null
+      const segments: LogSegment[] = [{ type: 'text', value: 'published ' }]
+      if (versionLabel && diffHref) {
+        segments.push({ type: 'code-link', value: versionLabel, href: diffHref })
+      } else if (versionLabel) {
+        segments.push({ type: 'code', value: versionLabel })
+      } else {
+        segments.push({ type: 'text', value: 'a new version' })
+      }
+      segments.push({ type: 'text', value: ' of ' })
+      if (docHref) {
+        segments.push({ type: 'link', value: docTitle, href: docHref })
+      } else {
+        segments.push({ type: 'text', value: docTitle })
+      }
+      return segments
+    }
+
+    case 'DOCUMENT_DELETED': {
+      const title = m?.title ?? 'a document'
+      return [{ type: 'text', value: 'deleted document ' }, { type: 'code', value: title }]
+    }
+
+    case 'COUNCIL_DECISION': {
+      const subject = m?.subject ?? 'a matter'
+      const outcome = m?.outcome ? ` — ${m.outcome}` : ''
+      return [{ type: 'text', value: `made a council decision on ${subject}${outcome}` }]
+    }
+
+    case 'SYSTEM_SETTING_UPDATED': {
+      const key = m?.key ?? '?'
+      const value = m?.value ?? '?'
+      return [
+        { type: 'text', value: 'updated setting ' },
+        { type: 'code', value: key },
+        { type: 'text', value: ' to ' },
+        { type: 'code', value: value }
+      ]
+    }
+
+    default:
+      return [{ type: 'text', value: (entry.action as string).toLowerCase().replace(/_/g, ' ') }]
   }
-  return null
 }

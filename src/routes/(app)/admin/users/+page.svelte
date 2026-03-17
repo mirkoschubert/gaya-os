@@ -74,8 +74,20 @@
   {#if form?.message}
     <p class="text-destructive text-sm">{form.message}</p>
   {:else if form?.success}
-    <p class="text-sm text-green-600">Done.</p>
+    {#if (form as { migratedCount?: number }).migratedCount !== undefined}
+      <p class="text-sm text-green-600">
+        Migrated {(form as { migratedCount: number }).migratedCount} citizen ID(s) to the new format.
+      </p>
+    {:else}
+      <p class="text-sm text-green-600">Done.</p>
+    {/if}
   {/if}
+
+  <form method="POST" action="?/migrateCitizenIds" use:enhance={reloadAfter}>
+    <Button type="submit" variant="outline" size="sm">
+      Migrate old citizen IDs
+    </Button>
+  </form>
 
   <Card.Root>
     <Table.Root>

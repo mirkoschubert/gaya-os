@@ -111,6 +111,36 @@ export const auth = betterAuth({
         type: 'date',
         required: false,
         input: false
+      },
+      bio: {
+        type: 'string',
+        required: false,
+        input: true
+      },
+      location: {
+        type: 'string',
+        required: false,
+        input: true
+      },
+      links: {
+        type: 'string', // stored as JSON string
+        required: false,
+        input: true
+      },
+      avatarUrl: {
+        type: 'string',
+        required: false,
+        input: false
+      },
+      heroUrl: {
+        type: 'string',
+        required: false,
+        input: false
+      },
+      showRealName: {
+        type: 'boolean',
+        defaultValue: true,
+        input: true
       }
     }
   }
