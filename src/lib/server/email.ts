@@ -35,3 +35,31 @@ export async function sendVerificationEmail({
 
   console.log('[Resend] Verification email sent, id:', data?.id)
 }
+
+export async function sendPasswordResetEmail({
+  to,
+  url
+}: {
+  to: string
+  url: string
+}) {
+  const { data, error } = await resend.emails.send({
+    from: fromEmail,
+    to,
+    subject: 'Reset your password – Gaya OS',
+    html: `
+      <p>You requested a password reset for your Gaya OS account.</p>
+      <p>Click the link below to set a new password:</p>
+      <p><a href="${url}">${url}</a></p>
+      <p>This link expires in 1 hour.</p>
+      <p>If you did not request a password reset, you can safely ignore this email.</p>
+    `
+  })
+
+  if (error) {
+    console.error('[Resend] Failed to send password reset email:', error)
+    throw new Error(`Email delivery failed: ${error.message}`)
+  }
+
+  console.log('[Resend] Password reset email sent, id:', data?.id)
+}

@@ -40,6 +40,15 @@ export interface GovernanceSettings {
       DOCUMENT_VERSION_AUTHORED: number
     }
   }
+  citizenship: {
+    minAccountAgeDays: number  // 0 = kein Minimum
+    motivationMinChars: number
+    ipWindowDays: number       // Fenster für IP-Duplikat-Prüfung
+    councilGracePeriodDays: number // Grace period before council members can cancel citizenship
+  }
+  username: {
+    changeCooldownDays: number // Mindestabstand zwischen Username-Änderungen
+  }
 }
 
 export const DEFAULT_GOVERNANCE_SETTINGS: GovernanceSettings = {
@@ -73,6 +82,15 @@ export const DEFAULT_GOVERNANCE_SETTINGS: GovernanceSettings = {
       DELEGATION_RECEIVED: 1,
       DOCUMENT_VERSION_AUTHORED: 10
     }
+  },
+  citizenship: {
+    minAccountAgeDays: 0,
+    motivationMinChars: 300,
+    ipWindowDays: 30,
+    councilGracePeriodDays: 30
+  },
+  username: {
+    changeCooldownDays: 90
   }
 }
 
@@ -90,6 +108,11 @@ export type SettingKey =
   | 'proposal.minSupportCount'
   | 'proposal.discussion.minDays'
   | 'engagement.points'
+  | 'citizenship.minAccountAgeDays'
+  | 'citizenship.motivationMinChars'
+  | 'citizenship.ipWindowDays'
+  | 'citizenship.councilGracePeriodDays'
+  | 'username.changeCooldownDays'
 
 export interface SystemSettingUpdatedMeta {
   key: string

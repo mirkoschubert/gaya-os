@@ -5,7 +5,7 @@ import { username } from 'better-auth/plugins'
 import { svelteKitHandler } from 'better-auth/svelte-kit'
 import { BETTER_AUTH_SECRET } from '$env/static/private'
 import { prisma } from './prisma'
-import { sendVerificationEmail } from './email'
+import { sendVerificationEmail, sendPasswordResetEmail } from './email'
 import { logAction } from './services/audit'
 import { getBaseUrl } from '$lib/url'
 
@@ -20,7 +20,10 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
     autoSignIn: false,
-    requireEmailVerification: false
+    requireEmailVerification: false,
+    sendResetPassword: async ({ user, url }) => {
+      await sendPasswordResetEmail({ to: user.email, url })
+    }
   },
 
   emailVerification: {
@@ -48,10 +51,34 @@ export const auth = betterAuth({
     session: {
       create: {
         after: async (session) => {
+          const ip = session.ipAddress ?? null
+          const ua = session.userAgent ?? null
+
+          // Update UserTechnicalProfile: append IP to history, keep last 50 entries
+          const existing = await prisma.userTechnicalProfile.findUnique({
+            where: { userId: session.userId },
+            select: { ipHistory: true, registrationIp: true }
+          })
+
+          const prevHistory = (existing?.ipHistory as Array<{ ip: string; seenAt: string }>) ?? []
+          const newEntry = ip ? [{ ip, seenAt: new Date().toISOString() }] : []
+          const ipHistory = [...newEntry, ...prevHistory].slice(0, 50)
+
           await Promise.all([
             prisma.user.update({
               where: { id: session.userId },
               data: { lastLogin: new Date() }
+            }),
+            prisma.userTechnicalProfile.upsert({
+              where: { userId: session.userId },
+              update: { lastIp: ip, lastUserAgent: ua, ipHistory },
+              create: {
+                userId: session.userId,
+                registrationIp: ip,
+                lastIp: ip,
+                lastUserAgent: ua,
+                ipHistory
+              }
             }),
             logAction({
               userId: session.userId,

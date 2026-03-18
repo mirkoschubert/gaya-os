@@ -5,6 +5,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.5.0] – 2026-03-18
+
+### Added
+- **Citizenship process completion:** fingerprint duplicate detection (`FP_MULTIPLE_APPS_SAME_FINGERPRINT`), `UserFlag` wiring on application submit, `revokeCitizenship()` and `cancelCitizenship()` service hooks
+- **Account deletion two-step flow:** Citizens must cancel citizenship before deleting; council members have a configurable grace period (`citizenship.councilGracePeriodDays`, default 30 days); content (proposals, votes, comments) is preserved via anonymisation instead of hard-delete
+- **Username system:** live availability check (debounced, `/api/username/check`), change cooldown (configurable via Governance), `UsernameBlacklist` and `UsernameChangeLog` DB models, username blacklist seed (~70 entries with regex patterns for hate speech, extremism, profanity, reserved names)
+- **Admin Governance – Username tab:** cooldown setting + blacklist management (add/delete entries with pattern and reason)
+- **Forgot / Reset Password:** `/auth/forgot-password` and `/auth/reset-password` pages with eye toggles; "Forgot password?" link on login page; Resend email integration
+- **Registration form:** password confirmation field + eye toggle on both password fields; live username availability check with inline status icons and blacklist reason display
+- **Profile Settings:** Identity + Username merged into one card; Avatar + Banner merged into one card; eye toggles on password change fields; live username check with cooldown notice; Delete Account section; Cancel Citizenship section
+- **Admin overview:** cards for all sub-pages (User Management, Governance, Documents, Roles & Permissions)
+- New audit actions: `CITIZENSHIP_REVOKED`, `USERNAME_CHANGED`, `USER_DELETED`
+- `citizenship.councilGracePeriodDays` governance setting
+
+### Changed
+- `deleteUser()` now anonymises the user record instead of hard-deleting, preserving all public contributions
+- Username blacklist reasons are surfaced in the UI inline (e.g. "Not allowed: Racial slur")
+
+---
+
 ## [0.4.0] – 2026-03-17
 
 ### Added

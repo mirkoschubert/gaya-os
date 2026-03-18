@@ -69,7 +69,10 @@
         />
       </div>
       <div class="flex flex-col gap-1.5">
-        <Label for="password">Password</Label>
+        <div class="flex items-center justify-between">
+          <Label for="password">Password</Label>
+          <a href="/auth/forgot-password" class="text-muted-foreground text-xs underline">Forgot password?</a>
+        </div>
         <Input
           id="password"
           type="password"

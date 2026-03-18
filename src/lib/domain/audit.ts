@@ -5,7 +5,13 @@ export type AuditAction =
   | 'USER_REGISTERED'
   | 'USER_LOGGED_IN'
   | 'USER_LOGGED_OUT'
+  | 'CITIZENSHIP_APPLIED'
   | 'CITIZENSHIP_GRANTED'
+  | 'CITIZENSHIP_REJECTED'
+  | 'CITIZENSHIP_REVOKED'
+  | 'USER_DELETED'
+  | 'USER_FLAGGED'
+  | 'USERNAME_CHANGED'
   | 'PROPOSAL_CREATED'
   | 'PROPOSAL_SUPPORT_ADDED'
   | 'COMMENT_CREATED'
@@ -32,7 +38,11 @@ export const ACTION_OPTIONS: { value: AuditAction | ''; label: string }[] = [
   { value: 'USER_REGISTERED', label: 'Registered' },
   { value: 'USER_LOGGED_IN', label: 'Logged in' },
   { value: 'USER_LOGGED_OUT', label: 'Logged out' },
+  { value: 'CITIZENSHIP_APPLIED', label: 'Citizenship applied' },
   { value: 'CITIZENSHIP_GRANTED', label: 'Citizenship granted' },
+  { value: 'CITIZENSHIP_REJECTED', label: 'Citizenship rejected' },
+  { value: 'CITIZENSHIP_REVOKED', label: 'Citizenship revoked' },
+  { value: 'USERNAME_CHANGED', label: 'Username changed' },
   { value: 'PROPOSAL_CREATED', label: 'Proposal created' },
   { value: 'COMMENT_CREATED', label: 'Comment created' },
   { value: 'VOTE_CAST', label: 'Vote cast' },
@@ -96,10 +106,48 @@ export function buildLogSentence(entry: ActivityEntry): LogSegment[] {
     case 'EMAIL_VERIFIED':
       return [{ type: 'text', value: 'verified their email address' }]
 
+    case 'CITIZENSHIP_APPLIED':
+      return [{ type: 'text', value: 'submitted a citizenship application' }]
+
     case 'CITIZENSHIP_GRANTED':
       return [
         { type: 'text', value: 'was granted citizenship — ID ' },
         { type: 'code', value: m?.citizenId ?? '?' }
+      ]
+
+    case 'CITIZENSHIP_REJECTED': {
+      const segments: LogSegment[] = [{ type: 'text', value: 'citizenship application was rejected' }]
+      if (m?.comment) {
+        segments.push({ type: 'text', value: ' — ' })
+        segments.push({ type: 'code', value: m.comment })
+      }
+      return segments
+    }
+
+    case 'USER_DELETED':
+      return [{ type: 'text', value: 'deleted their account' }]
+
+    case 'CITIZENSHIP_REVOKED': {
+      const segments: LogSegment[] = [{ type: 'text', value: 'citizenship was revoked' }]
+      if (m?.reason) {
+        segments.push({ type: 'text', value: ' — ' })
+        segments.push({ type: 'code', value: m.reason })
+      }
+      return segments
+    }
+
+    case 'USERNAME_CHANGED':
+      return [
+        { type: 'text', value: 'changed username from ' },
+        { type: 'code', value: m?.oldUsername ?? '?' },
+        { type: 'text', value: ' to ' },
+        { type: 'code', value: m?.newUsername ?? '?' }
+      ]
+
+    case 'USER_FLAGGED':
+      return [
+        { type: 'text', value: 'was flagged: ' },
+        { type: 'code', value: m?.code ?? '?' }
       ]
 
     case 'CITIZEN_ID_MIGRATED':

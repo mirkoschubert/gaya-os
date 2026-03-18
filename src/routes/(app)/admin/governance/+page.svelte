@@ -8,6 +8,7 @@
   import { Input } from '$lib/components/ui/input'
   import { Label } from '$lib/components/ui/label'
   import { Button } from '$lib/components/ui/button'
+  import { Trash2 } from '@lucide/svelte'
   import type { VoteThreshold } from '$lib/domain/settings'
 
   let { data, form } = $props()
@@ -67,6 +68,7 @@
       <Tabs.Trigger value="voting">Voting</Tabs.Trigger>
       <Tabs.Trigger value="proposals">Proposals</Tabs.Trigger>
       <Tabs.Trigger value="engagement">Engagement Points</Tabs.Trigger>
+      <Tabs.Trigger value="username">Usernames</Tabs.Trigger>
     </Tabs.List>
 
     <!-- Councils Tab -->
@@ -327,6 +329,105 @@
           </form>
         </Card.Content>
       </Card.Root>
+    </Tabs.Content>
+    <!-- Username Tab -->
+    <Tabs.Content value="username">
+      <div class="space-y-6">
+        <!-- Cooldown setting -->
+        <Card.Root>
+          <Card.Header>
+            <Card.Title>Username Change Cooldown</Card.Title>
+            <Card.Description>
+              Minimum number of days a user must wait between username changes. Set to 0 to disable.
+            </Card.Description>
+          </Card.Header>
+          <Card.Content>
+            <form method="POST" action="?/updateUsername" use:enhance={reloadAfter} class="space-y-4">
+              <div class="space-y-2">
+                <Label for="changeCooldownDays">Cooldown (days)</Label>
+                <Input
+                  id="changeCooldownDays"
+                  name="changeCooldownDays"
+                  type="number"
+                  min="0"
+                  value={data.settings.username.changeCooldownDays}
+                  class="w-40"
+                />
+                <p class="text-muted-foreground text-xs">
+                  Default: 90 days. Users on cooldown see their next available change date.
+                </p>
+              </div>
+              <Button type="submit">Save username settings</Button>
+            </form>
+          </Card.Content>
+        </Card.Root>
+
+        <!-- Blacklist -->
+        <Card.Root>
+          <Card.Header>
+            <Card.Title>Username Blacklist</Card.Title>
+            <Card.Description>
+              Patterns (exact words or regex) that users cannot register or switch to as a username.
+              Matched case-insensitively.
+            </Card.Description>
+          </Card.Header>
+          <Card.Content class="space-y-4">
+            <!-- Add pattern form -->
+            <form method="POST" action="?/addBlacklistPattern" use:enhance={reloadAfter} class="flex gap-3 items-end">
+              <div class="space-y-1.5 flex-1">
+                <Label for="pattern">Pattern</Label>
+                <Input id="pattern" name="pattern" type="text" placeholder="e.g. admin or ^(fuck|shit).*" required />
+              </div>
+              <div class="space-y-1.5 flex-1">
+                <Label for="reason">Reason (optional)</Label>
+                <Input id="reason" name="reason" type="text" placeholder="e.g. Reserved word" />
+              </div>
+              <Button type="submit">Add pattern</Button>
+            </form>
+
+            <!-- Existing patterns table -->
+            {#if data.blacklist.length === 0}
+              <p class="text-muted-foreground text-sm">No patterns in the blacklist yet.</p>
+            {:else}
+              <div class="rounded-md border">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b bg-muted/40">
+                      <th class="px-3 py-2 text-left font-medium">Pattern</th>
+                      <th class="px-3 py-2 text-left font-medium">Reason</th>
+                      <th class="px-3 py-2 text-left font-medium">Added by</th>
+                      <th class="px-3 py-2 text-left font-medium">Date</th>
+                      <th class="px-3 py-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {#each data.blacklist as entry}
+                      <tr class="border-b last:border-0">
+                        <td class="px-3 py-2 font-mono text-xs">{entry.pattern}</td>
+                        <td class="text-muted-foreground px-3 py-2">{entry.reason ?? '—'}</td>
+                        <td class="text-muted-foreground px-3 py-2">
+                          {entry.createdBy?.username ? `@${entry.createdBy.username}` : (entry.createdBy?.name ?? '—')}
+                        </td>
+                        <td class="text-muted-foreground px-3 py-2">
+                          {new Date(entry.createdAt).toLocaleDateString()}
+                        </td>
+                        <td class="px-3 py-2 text-right">
+                          <form method="POST" action="?/deleteBlacklistPattern" use:enhance={reloadAfter}>
+                            <input type="hidden" name="id" value={entry.id} />
+                            <Button type="submit" variant="ghost" size="icon" class="h-7 w-7">
+                              <Trash2 class="h-3.5 w-3.5" />
+                            </Button>
+                          </form>
+                        </td>
+                      </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              </div>
+            {/if}
+          </Card.Content>
+        </Card.Root>
+      </div>
     </Tabs.Content>
   </Tabs.Root>
 </div>

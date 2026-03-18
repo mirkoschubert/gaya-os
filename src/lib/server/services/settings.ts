@@ -66,6 +66,21 @@ export async function getAllSettings(): Promise<GovernanceSettings> {
           d.engagement.points.DOCUMENT_VERSION_AUTHORED
         )
       }
+    },
+    citizenship: {
+      minAccountAgeDays: get(
+        'citizenship.minAccountAgeDays',
+        d.citizenship.minAccountAgeDays
+      ),
+      motivationMinChars: get(
+        'citizenship.motivationMinChars',
+        d.citizenship.motivationMinChars
+      ),
+      ipWindowDays: get('citizenship.ipWindowDays', d.citizenship.ipWindowDays),
+      councilGracePeriodDays: get('citizenship.councilGracePeriodDays', d.citizenship.councilGracePeriodDays)
+    },
+    username: {
+      changeCooldownDays: get('username.changeCooldownDays', d.username.changeCooldownDays)
     }
   }
 }

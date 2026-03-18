@@ -1,12 +1,19 @@
 import { error, fail } from '@sveltejs/kit'
 import { getAllSettings, updateSetting } from '$lib/server/services/settings'
+import { prisma } from '$lib/server/prisma'
 import type { PageServerLoad, Actions } from './$types'
 import type { VoteThreshold } from '$lib/domain/settings'
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
-  const settings = await getAllSettings()
-  return { settings }
+  const [settings, blacklist] = await Promise.all([
+    getAllSettings(),
+    prisma.usernameBlacklist.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { createdBy: { select: { id: true, name: true, username: true } } }
+    })
+  ])
+  return { settings, blacklist }
 }
 
 function getActor(locals: App.Locals) {
@@ -115,5 +122,54 @@ export const actions: Actions = {
     }
 
     return { success: true, tab: 'engagement' }
+  },
+
+  updateUsername: async ({ locals, request }) => {
+    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    const data = await request.formData()
+    const actor = getActor(locals)
+
+    const cooldownDays = parseInt(data.get('changeCooldownDays') as string)
+    if (isNaN(cooldownDays) || cooldownDays < 0) {
+      return fail(400, { message: 'Invalid cooldown value.' })
+    }
+
+    await updateSetting('username.changeCooldownDays', cooldownDays, actor)
+    return { success: true, tab: 'username' }
+  },
+
+  addBlacklistPattern: async ({ locals, request }) => {
+    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    const data = await request.formData()
+
+    const pattern = (data.get('pattern') as string | null)?.trim() ?? ''
+    const reason = (data.get('reason') as string | null)?.trim() || null
+
+    if (!pattern) return fail(400, { message: 'Pattern is required.', tab: 'username' })
+
+    // Validate regex if it looks like one
+    if (/[[\]()+*?{}|\\^$]/.test(pattern)) {
+      try { new RegExp(pattern, 'i') } catch {
+        return fail(400, { message: 'Invalid regex pattern.', tab: 'username' })
+      }
+    }
+
+    const existing = await prisma.usernameBlacklist.findUnique({ where: { pattern } })
+    if (existing) return fail(400, { message: 'This pattern already exists.', tab: 'username' })
+
+    await prisma.usernameBlacklist.create({
+      data: { pattern, reason, createdById: locals.user!.id }
+    })
+    return { success: true, tab: 'username' }
+  },
+
+  deleteBlacklistPattern: async ({ locals, request }) => {
+    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    const data = await request.formData()
+    const id = (data.get('id') as string | null)?.trim() ?? ''
+    if (!id) return fail(400, { message: 'Missing ID.', tab: 'username' })
+
+    await prisma.usernameBlacklist.delete({ where: { id } })
+    return { success: true, tab: 'username' }
   }
 }
