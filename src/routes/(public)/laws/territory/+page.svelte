@@ -1,13 +1,70 @@
+<script lang="ts">
+  import { marked } from 'marked'
+  import { Badge } from '$lib/components/ui/badge'
+  import type { PageData } from './$types'
+
+  let { data }: { data: PageData } = $props()
+
+  const renderedHtml = $derived(
+    data.document ? (marked.parse(data.document.content) as string) : ''
+  )
+
+  let bgOffset = $state(0)
+  $effect(() => {
+    function handleScroll() {
+      bgOffset = window.scrollY * 0.4
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  })
+</script>
+
 <svelte:head>
   <title>Territorial Law in Exile · Civitas Gaya</title>
 </svelte:head>
 
-<div class="pt-10 pb-20 max-w-3xl">
-  <div class="mb-2 text-sm text-muted-foreground">Laws & Regulations</div>
-  <h1 class="mb-4 text-3xl font-bold tracking-tight">Territorial Law in Exile</h1>
-  <p class="text-muted-foreground leading-relaxed">
-    This organic law defines Civitas Gaya's relationship to its homeworld Gaya, its symbolic
-    territories on Earth, and the legal status of the nation as a state in exile.
-    It will be published here once adopted.
-  </p>
-</div>
+<section
+  class="relative overflow-hidden"
+  style="height: 60dvh; min-height: 360px; margin-left: calc(50% - 50vw); width: 100vw;"
+>
+  <div
+    class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+    style="background-image: url('/images/gaya-orbit.webp'); transform: translateY({bgOffset}px); will-change: transform; top: -20%; height: 140%;"
+  ></div>
+  <div class="absolute inset-0 bg-black/65"></div>
+
+  <div class="relative z-10 flex h-full flex-col items-center justify-center text-center px-4">
+    <div class="mb-3 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-white/80 backdrop-blur-sm">
+      Laws & Regulations
+    </div>
+    <h1 class="mb-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+      {data.document?.title ?? 'Territorial Law in Exile'}
+    </h1>
+    {#if data.document}
+      <div class="flex items-center justify-center gap-3 mt-2">
+        <Badge variant="outline" class="border-white/30 text-white/80 font-mono">
+          v{data.document.versionLabel}
+        </Badge>
+        <span class="text-white/50 text-sm">
+          Published {new Date(data.document.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+        </span>
+      </div>
+    {/if}
+  </div>
+</section>
+
+{#if !data.document}
+  <div class="pt-16 pb-20 max-w-2xl">
+    <div class="mb-2 text-sm text-muted-foreground">Laws & Regulations</div>
+    <h2 class="mb-4 text-2xl font-bold tracking-tight">Not yet published</h2>
+    <p class="text-muted-foreground leading-relaxed">
+      This law will be published here once adopted in digital assembly.
+    </p>
+  </div>
+{:else}
+  <div class="py-16 max-w-3xl mx-auto">
+    <article class="prose">
+      {@html renderedHtml}
+    </article>
+  </div>
+{/if}

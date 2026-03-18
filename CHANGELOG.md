@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.5.1] – 2026-03-18
+
+### Changed
+- Law pages (`/laws/citizenship`, `/laws/councils`, `/laws/territory`) now load their content dynamically from the DB and render with the same hero + Markdown layout as the Constitution page; unpublished laws show a "Not yet published" fallback
+
+---
+
 ## [0.5.0] – 2026-03-18
 
 ### Added
