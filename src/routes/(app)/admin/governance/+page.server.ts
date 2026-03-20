@@ -192,5 +192,23 @@ export const actions: Actions = {
 
     await prisma.usernameBlacklist.delete({ where: { id } })
     return { success: true, tab: 'username' }
+  },
+
+  updateChat: async ({ locals, request }) => {
+    if (locals.user?.role !== 'ADMIN') error(403, 'Forbidden')
+    const data = await request.formData()
+    const actor = getActor(locals)
+
+    const allowVisitors = data.get('allowVisitors') === 'true'
+    const visitorChannels = data.get('visitorChannels') as string | null
+
+    if (!['none', 'readonly', 'readwrite'].includes(visitorChannels ?? '')) {
+      return fail(400, { message: 'Invalid visitor channel setting.' })
+    }
+
+    await updateSetting('chat.allowVisitors', allowVisitors, actor)
+    await updateSetting('chat.visitorChannels', visitorChannels, actor)
+
+    return { success: true, tab: 'chat' }
   }
 }

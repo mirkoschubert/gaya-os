@@ -22,7 +22,9 @@ export async function getAllSettings(): Promise<GovernanceSettings> {
       minSize: get('council.minSize', d.council.minSize),
       maxSize: get('council.maxSize', d.council.maxSize),
       termLimitMonths: get('council.termLimitMonths', d.council.termLimitMonths),
-      requiresElection: get('council.requiresElection', d.council.requiresElection)
+      requiresElection: get('council.requiresElection', d.council.requiresElection),
+      nominationWindowDays: get('council.nominationWindowDays', d.council.nominationWindowDays),
+      recallSignaturePercent: get('council.recallSignaturePercent', d.council.recallSignaturePercent)
     },
     voting: {
       thresholds: {
@@ -85,6 +87,10 @@ export async function getAllSettings(): Promise<GovernanceSettings> {
     },
     nation: {
       stage: get('nation.stage', d.nation.stage)
+    },
+    chat: {
+      allowVisitors: get('chat.allowVisitors', d.chat.allowVisitors),
+      visitorChannels: get('chat.visitorChannels', d.chat.visitorChannels)
     }
   }
 }

@@ -25,6 +25,7 @@ export type AdminUserView = {
   createdAt: Date
   technicalProfile: TechnicalProfileView | null
   applicationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | null
+  councilMemberships: { unitId: string; councilId: string; councilName: string }[]
 }
 
 export async function listUsers(): Promise<AdminUserView[]> {
@@ -54,6 +55,17 @@ export async function listUsers(): Promise<AdminUserView[]> {
       },
       citizenshipApplication: {
         select: { status: true }
+      },
+      memberships: {
+        where: { role: 'COUNCIL_MEMBER' },
+        select: {
+          unitId: true,
+          unit: {
+            select: {
+              councils: { select: { id: true, name: true } }
+            }
+          }
+        }
       }
     }
   })
@@ -66,7 +78,10 @@ export async function listUsers(): Promise<AdminUserView[]> {
           ipHistory: (u.technicalProfile.ipHistory as Array<{ ip: string; seenAt: string }> | null) ?? null
         }
       : null,
-    applicationStatus: (u.citizenshipApplication?.status as AdminUserView['applicationStatus']) ?? null
+    applicationStatus: (u.citizenshipApplication?.status as AdminUserView['applicationStatus']) ?? null,
+    councilMemberships: u.memberships.flatMap((m) =>
+      m.unit.councils.map((c) => ({ unitId: m.unitId, councilId: c.id, councilName: c.name }))
+    )
   }))
 }
 

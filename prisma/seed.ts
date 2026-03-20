@@ -238,6 +238,33 @@ async function seedUsernameBlacklist() {
   console.log(`Seeded ${added} username blacklist entries.`)
 }
 
+async function seedNationalCouncil() {
+  console.log('Seeding national Unit + Council...')
+
+  const unit = await prisma.unit.upsert({
+    where: { slug: 'nation' },
+    update: { name: 'Gaya Nation', description: 'The nation-wide organizational unit.' },
+    create: {
+      name: 'Gaya Nation',
+      slug: 'nation',
+      description: 'The nation-wide organizational unit.'
+    }
+  })
+
+  await prisma.council.upsert({
+    where: { unitId: unit.id },
+    update: { name: 'National Council', type: 'NATIONAL' },
+    create: {
+      unitId: unit.id,
+      name: 'National Council',
+      type: 'NATIONAL',
+      scopeDescription: 'The supreme governing council of the nation. Reviews all proposals and coordinates governance.'
+    }
+  })
+
+  console.log(`Seeded Unit "${unit.name}" with National Council.`)
+}
+
 async function main() {
   console.log('Seeding RoleCapability matrix...')
 
@@ -260,6 +287,7 @@ async function main() {
   console.log(`Seeded ${ROLES.length} roles with ${Object.keys(DEFAULT_MATRIX.CITIZEN).length} capabilities each.`)
 
   await seedUsernameBlacklist()
+  await seedNationalCouncil()
 }
 
 main()

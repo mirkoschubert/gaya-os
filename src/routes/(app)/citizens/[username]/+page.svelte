@@ -7,8 +7,9 @@
   import { Badge } from '$lib/components/ui/badge'
   import { Button } from '$lib/components/ui/button'
   import { Separator } from '$lib/components/ui/separator'
-  import { MapPin, Link as LinkIcon, Calendar, Pencil } from '@lucide/svelte'
+  import { MapPin, Link as LinkIcon, Calendar, Pencil, MessageSquare } from '@lucide/svelte'
   import { buildLogSentence, formatRoles } from '$lib/domain/audit'
+  import { messagesCommand } from '$lib/stores/messages'
   import type { PageData } from './$types'
 
   let { data }: { data: PageData } = $props()
@@ -18,6 +19,19 @@
   const isOwnProfile = $derived(currentUser?.id === data.citizen.id)
   const caps = $derived((page.data as { caps?: Record<string, boolean> }).caps ?? {})
   const canEditOwnProfile = $derived(caps['can_edit_own_profile'] ?? false)
+  const canStartDM = $derived(caps['can_start_dm'] ?? false)
+
+  async function openDM() {
+    const res = await fetch('/api/messages/dm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetUserId: data.citizen.id })
+    })
+    if (res.ok) {
+      const { channelId } = await res.json()
+      messagesCommand.set({ action: 'open', channelId })
+    }
+  }
 
   function formatTimestamp(d: Date | string): string {
     return new Date(d).toLocaleString('en-GB', {
@@ -58,12 +72,20 @@
     class="flex h-64 w-full items-end justify-end p-3 bg-linear-to-br from-primary/20 to-primary/5"
     style={data.citizen.heroUrl ? `background-image: url('${data.citizen.heroUrl}'); background-size: cover; background-position: center;` : ''}
   >
-    {#if isOwnProfile && canEditOwnProfile}
-      <Button variant="secondary" size="sm" href="/settings/profile">
-        <Pencil class="size-3.5" />
-        Edit Profile
-      </Button>
-    {/if}
+    <div class="flex gap-2">
+      {#if !isOwnProfile && canStartDM}
+        <Button variant="secondary" size="sm" onclick={openDM}>
+          <MessageSquare class="size-3.5" />
+          Message
+        </Button>
+      {/if}
+      {#if isOwnProfile && canEditOwnProfile}
+        <Button variant="secondary" size="sm" href="/settings/profile">
+          <Pencil class="size-3.5" />
+          Edit Profile
+        </Button>
+      {/if}
+    </div>
   </div>
 
   <!-- Avatar + Identity row -->

@@ -22,6 +22,8 @@
   let policyType = $state<VoteThreshold['type']>('unanimous')
   let budgetType = $state<VoteThreshold['type']>('unanimous')
   let electionType = $state<VoteThreshold['type']>('unanimous')
+  let allowVisitors = $state(false)
+  let visitorChannels = $state('none')
   let activeTab = $state('councils')
 
   $effect(() => {
@@ -32,6 +34,8 @@
     policyType = data.settings.voting.thresholds.policy.type
     budgetType = data.settings.voting.thresholds.budget.type
     electionType = data.settings.voting.thresholds.election.type
+    allowVisitors = data.settings.chat.allowVisitors
+    visitorChannels = data.settings.chat.visitorChannels
     const f = form as { tab?: string } | null
     activeTab = f?.tab ?? activeTab
   })
@@ -82,6 +86,7 @@
       <Tabs.Trigger value="proposals">Proposals</Tabs.Trigger>
       <Tabs.Trigger value="engagement">Engagement Points</Tabs.Trigger>
       <Tabs.Trigger value="username">Usernames</Tabs.Trigger>
+      <Tabs.Trigger value="chat">Chat</Tabs.Trigger>
     </Tabs.List>
 
     <!-- Nation Tab -->
@@ -487,6 +492,57 @@
           </Card.Content>
         </Card.Root>
       </div>
+    </Tabs.Content>
+    <!-- Chat Tab -->
+    <Tabs.Content value="chat">
+      <Card.Root>
+        <Card.Header>
+          <Card.Title>Chat / Messages</Card.Title>
+          <Card.Description>
+            Control whether visitors can read or participate in the general citizen channel.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <form method="POST" action="?/updateChat" use:enhance={reloadAfter} class="space-y-6">
+            <div class="flex items-center gap-3">
+              <Switch.Root
+                id="allowVisitors"
+                checked={allowVisitors}
+                onCheckedChange={(v) => (allowVisitors = v)}
+              />
+              <input type="hidden" name="allowVisitors" value={allowVisitors} />
+              <Label for="allowVisitors">Allow visitors to access chat</Label>
+            </div>
+            <p class="text-muted-foreground text-xs -mt-4">
+              When disabled, visitors see no chat widget at all.
+            </p>
+
+            <div class="space-y-2">
+              <Label>Visitor channel access</Label>
+              <input type="hidden" name="visitorChannels" value={visitorChannels} />
+              <Select.Root type="single" bind:value={visitorChannels} disabled={!allowVisitors}>
+                <Select.Trigger class="w-64">
+                  {{
+                    none: 'No access',
+                    readonly: 'Read only',
+                    readwrite: 'Read and write'
+                  }[visitorChannels] ?? visitorChannels}
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Item value="none">No access</Select.Item>
+                  <Select.Item value="readonly">Read only</Select.Item>
+                  <Select.Item value="readwrite">Read and write</Select.Item>
+                </Select.Content>
+              </Select.Root>
+              <p class="text-muted-foreground text-xs">
+                Applies to the general citizen channel only. Visitors can never access council or DM channels.
+              </p>
+            </div>
+
+            <Button type="submit">Save chat settings</Button>
+          </form>
+        </Card.Content>
+      </Card.Root>
     </Tabs.Content>
   </Tabs.Root>
 </div>

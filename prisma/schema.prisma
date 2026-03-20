@@ -30,6 +30,57 @@ enum MembershipRole {
   COUNCIL_MEMBER
 }
 
+enum CouncilType {
+  NATIONAL
+  REGIONAL
+  THEMATIC
+}
+
+enum CouncilSessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AgendaItemStatus {
+  OPEN
+  IN_DISCUSSION
+  RESOLVED
+  DEFERRED
+}
+
+enum NominationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum InternalVoteStatus {
+  OPEN
+  CLOSED
+}
+
+enum InternalVoteChoice {
+  YES
+  NO
+  ABSTAIN
+}
+
+enum ChannelType {
+  COUNCIL_INTERNAL
+  CITIZEN_GENERAL  // The global citizen channel - always open, not closeable
+  COUNCIL_PUBLIC   // Contact-a-council group DM - closeable by non-council members
+  DIRECT_MESSAGE   // 1:1 DM - closeable
+}
+
+enum MessageReactionType {
+  THUMBS_UP
+  THUMBS_DOWN
+  QUESTION
+}
+
 enum DocumentType {
   CONSTITUTION
   POLICY
@@ -105,18 +156,202 @@ model Membership {
   role     MembershipRole @default(MEMBER)
   joinedAt DateTime       @default(now())
 
+  user user @relation(fields: [userId], references: [id])
   unit Unit @relation(fields: [unitId], references: [id])
 
   @@unique([userId, unitId])
 }
 
 model Council {
-  id        String   @id @default(cuid())
-  unitId    String
-  name      String
-  createdAt DateTime @default(now())
+  id               String      @id @default(cuid())
+  unitId           String      @unique
+  name             String
+  type             CouncilType
+  scopeDescription String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
-  unit Unit @relation(fields: [unitId], references: [id])
+  unit             Unit                    @relation(fields: [unitId], references: [id])
+  sessions         CouncilSession[]
+  nominations      CandidateNomination[]
+  internalVotes    InternalVote[]
+  representatives  CouncilRepresentative[]
+  channels         Channel[]
+}
+
+model CouncilSession {
+  id          String               @id @default(cuid())
+  councilId   String
+  title       String
+  description String?
+  scheduledAt DateTime
+  endsAt      DateTime?
+  status      CouncilSessionStatus @default(SCHEDULED)
+  location    String?
+  notes       String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  council     Council              @relation(fields: [councilId], references: [id])
+  agendaItems CouncilAgendaItem[]
+
+  @@index([councilId, scheduledAt])
+}
+
+model CouncilAgendaItem {
+  id          String           @id @default(cuid())
+  sessionId   String
+  title       String
+  description String?
+  status      AgendaItemStatus @default(OPEN)
+  order       Int              @default(0)
+  proposalId  String?
+  outcome     String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  session  CouncilSession @relation(fields: [sessionId], references: [id])
+  proposal Proposal?      @relation(fields: [proposalId], references: [id])
+
+  @@index([sessionId, order])
+}
+
+model CouncilRepresentative {
+  id        String    @id @default(cuid())
+  councilId String
+  userId    String
+  area      String
+  since     DateTime  @default(now())
+  until     DateTime?
+
+  council Council @relation(fields: [councilId], references: [id])
+  user    user    @relation(fields: [userId], references: [id])
+
+  @@index([councilId])
+}
+
+model CandidateNomination {
+  id            String           @id @default(cuid())
+  councilId     String
+  candidateId   String
+  nominatedById String?
+  voteSessionId String?
+  status        NominationStatus @default(PENDING)
+  statement     String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  council     Council      @relation(fields: [councilId], references: [id])
+  voteSession VoteSession? @relation(fields: [voteSessionId], references: [id])
+
+  @@unique([councilId, candidateId, voteSessionId])
+  @@index([councilId, status])
+}
+
+model InternalVote {
+  id          String             @id @default(cuid())
+  councilId   String
+  title       String
+  description String?
+  status      InternalVoteStatus @default(OPEN)
+  endsAt      DateTime?
+  outcome     String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  council  Council          @relation(fields: [councilId], references: [id])
+  ballots  InternalBallot[]
+  messages Message[]
+
+  @@index([councilId, status])
+}
+
+model InternalBallot {
+  id             String             @id @default(cuid())
+  internalVoteId String
+  voterId        String
+  choice         InternalVoteChoice
+  createdAt      DateTime           @default(now())
+
+  internalVote InternalVote @relation(fields: [internalVoteId], references: [id])
+
+  @@unique([internalVoteId, voterId])
+}
+
+model Channel {
+  id        String      @id @default(cuid())
+  councilId String?
+  type      ChannelType @default(COUNCIL_INTERNAL)
+  name      String?
+  createdAt DateTime    @default(now())
+
+  council  Council?            @relation(fields: [councilId], references: [id])
+  messages Message[]
+  members  ChannelMembership[]
+  mutes    ChannelMute[]
+
+  @@index([councilId])
+}
+
+model ChannelMembership {
+  id         String    @id @default(cuid())
+  channelId  String
+  userId     String
+  joinedAt   DateTime  @default(now())
+  lastReadAt DateTime?
+  hiddenAt   DateTime? // set when user "closes" a closeable channel
+
+  channel Channel @relation(fields: [channelId], references: [id])
+  user    user    @relation(fields: [userId], references: [id])
+
+  @@unique([channelId, userId])
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  channelId      String
+  authorId       String
+  body           String
+  editedAt       DateTime?
+  deletedAt      DateTime?
+  pinned         Boolean   @default(false)
+  internalVoteId String?
+  createdAt      DateTime  @default(now())
+
+  channel      Channel           @relation(fields: [channelId], references: [id])
+  author       user              @relation(fields: [authorId], references: [id])
+  internalVote InternalVote?     @relation(fields: [internalVoteId], references: [id])
+  reactions    MessageReaction[]
+
+  @@index([channelId, createdAt])
+}
+
+model ChannelMute {
+  id        String    @id @default(cuid())
+  channelId String
+  userId    String
+  mutedById String
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  channel Channel @relation(fields: [channelId], references: [id])
+  user    user    @relation("ChannelMuteTarget", fields: [userId], references: [id])
+  mutedBy user    @relation("ChannelMutedBy", fields: [mutedById], references: [id])
+
+  @@unique([channelId, userId])
+}
+
+model MessageReaction {
+  id        String              @id @default(cuid())
+  messageId String
+  userId    String
+  type      MessageReactionType
+  createdAt DateTime            @default(now())
+
+  message Message @relation(fields: [messageId], references: [id])
+  user    user    @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId, type])
 }
 
 model Document {
@@ -148,20 +383,24 @@ model DocumentVersion {
 }
 
 model Proposal {
-  id        String           @id @default(cuid())
-  title     String
-  body      String
-  category  ProposalCategory
-  status    ProposalStatus   @default(DISCUSSION)
-  unitId    String?
-  authorId  String
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id                  String           @id @default(cuid())
+  title               String
+  body                String
+  category            ProposalCategory
+  status              ProposalStatus   @default(DISCUSSION)
+  unitId              String?
+  authorId            String
+  reviewedByCouncilId String?
+  reviewNote          String?
+  reviewedAt          DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 
-  unit        Unit?             @relation(fields: [unitId], references: [id])
+  unit        Unit?               @relation(fields: [unitId], references: [id])
   supports    ProposalSupport[]
   comments    Comment[]
   voteSession VoteSession?
+  agendaItems CouncilAgendaItem[]
 }
 
 model ProposalSupport {
@@ -193,8 +432,9 @@ model VoteSession {
   endsAt     DateTime
   createdAt  DateTime @default(now())
 
-  proposal Proposal @relation(fields: [proposalId], references: [id])
-  votes    Vote[]
+  proposal    Proposal              @relation(fields: [proposalId], references: [id])
+  votes       Vote[]
+  nominations CandidateNomination[]
 }
 
 model Vote {
@@ -415,6 +655,13 @@ model user {
   userFlags              UserFlag[]
   usernameChanges        UsernameChangeLog[]
   usernameBlacklists     UsernameBlacklist[]
+  memberships            Membership[]
+  councilRepresentatives CouncilRepresentative[]
+  channelMemberships     ChannelMembership[]
+  messages               Message[]
+  messageReactions       MessageReaction[]
+  channelMutesReceived   ChannelMute[]           @relation("ChannelMuteTarget")
+  channelMutesMade       ChannelMute[]           @relation("ChannelMutedBy")
 }
 
 model session {

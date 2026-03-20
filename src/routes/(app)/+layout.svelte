@@ -11,10 +11,12 @@
   import NavMenu from '$lib/components/app/nav-menu.svelte'
   import AdminNavMenu from '$lib/components/app/admin-nav-menu.svelte'
   import CommunityNavMenu from '$lib/components/app/community-nav-menu.svelte'
+  import CouncilNavMenu from '$lib/components/app/council-nav-menu.svelte'
+  import MessagesWidget from '$lib/components/app/messages-widget.svelte'
   import { LogOut, Earth } from '@lucide/svelte'
   import AppBreadcrumb from '$lib/components/app/breadcrumb.svelte'
 
-  let { children } = $props()
+  let { data, children } = $props()
 
   const session = useSession()
 
@@ -103,6 +105,15 @@
         </Sidebar.GroupContent>
       </Sidebar.Group>
 
+      {#if data.isCouncilMember}
+        <Sidebar.Group>
+          <Sidebar.GroupLabel>Council</Sidebar.GroupLabel>
+          <Sidebar.GroupContent>
+            <CouncilNavMenu councilMemberships={data.councilMemberships} />
+          </Sidebar.GroupContent>
+        </Sidebar.Group>
+      {/if}
+
       {#if isAdmin}
         <Sidebar.Group>
           <Sidebar.GroupLabel>Admin</Sidebar.GroupLabel>
@@ -159,6 +170,15 @@
 
     <Sidebar.Rail />
   </Sidebar.Root>
+
+  {#if data.caps['can_send_messages'] || data.caps['can_view_messages']}
+    <MessagesWidget
+      channels={data.chatChannels}
+      userId={data.user.id}
+      canSendMessages={data.caps['can_send_messages'] ?? false}
+      canModerateMessages={data.caps['can_moderate_messages'] ?? false}
+    />
+  {/if}
 
   <Sidebar.Inset>
     <header class="flex h-14 shrink-0 items-center gap-2 border-b px-4">

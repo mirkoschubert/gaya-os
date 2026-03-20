@@ -16,6 +16,7 @@
   import { columns } from './columns.svelte.js'
   import type { ApplicationView } from '$lib/server/services/citizenship'
   import type { AdminUserView } from '$lib/server/services/users'
+  import type { CouncilOption } from '$lib/server/services/councils'
 
   let { data, form } = $props()
 
@@ -218,6 +219,7 @@
                 <Badge variant="secondary" class="ml-1.5 text-xs">Pending</Badge>
               {/if}
             </Tabs.Trigger>
+            <Tabs.Trigger value="council" class="flex-1">Council</Tabs.Trigger>
           </Tabs.List>
 
           <!-- Details Tab -->
@@ -446,6 +448,46 @@
                   >
                     Reject
                   </Button>
+                </div>
+              {/if}
+            {/if}
+          </Tabs.Content>
+
+          <!-- Council Tab -->
+          <Tabs.Content value="council" class="mt-4 space-y-4">
+            {#if selectedUser.civicStatus !== 'CITIZEN'}
+              <p class="text-sm text-muted-foreground">
+                Only Citizens can be Council members.
+              </p>
+            {:else}
+              <p class="text-muted-foreground text-xs uppercase tracking-wide">Council Memberships</p>
+              {#if (data.councils as CouncilOption[]).length === 0}
+                <p class="text-sm text-muted-foreground">No councils have been set up yet.</p>
+              {:else}
+                <div class="space-y-2">
+                  {#each data.councils as council}
+                    {@const isMember = selectedUser.councilMemberships.some(
+                      (m) => m.unitId === council.unitId
+                    )}
+                    <div class="flex items-center justify-between rounded-md border px-3 py-2">
+                      <div>
+                        <p class="text-sm font-medium">{council.name}</p>
+                        <p class="text-xs text-muted-foreground">{council.unitName}</p>
+                      </div>
+                      <form method="POST" action="?/setCouncilMembership" use:enhance={reloadAfter}>
+                        <input type="hidden" name="userId" value={selectedUser.id} />
+                        <input type="hidden" name="unitId" value={council.unitId} />
+                        <input type="hidden" name="isMember" value={String(!isMember)} />
+                        <Button
+                          type="submit"
+                          variant={isMember ? 'destructive' : 'outline'}
+                          size="sm"
+                        >
+                          {isMember ? 'Remove' : 'Add'}
+                        </Button>
+                      </form>
+                    </div>
+                  {/each}
                 </div>
               {/if}
             {/if}

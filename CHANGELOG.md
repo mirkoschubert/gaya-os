@@ -5,6 +5,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.7.0] - 2026-03-20
+
+### Added
+- Messages widget: floating panel with collapsible sidebar, channel list (Citizens, Council Internal, Council Public, Direct Messages)
+- Direct Messages between Citizens via profile page "Message" button
+- "Contact Council" opens per-council public channel in widget
+- Visitor chat access configurable in Admin Governance (none / readonly / readwrite)
+- Pinned message banner (one per channel, Twitch-style) with moderator pin/unpin
+- Moderator context menu (right-click) for pin, delete, mute, clear
+- @mention autocomplete with avatar palette; `@username` highlighted in messages
+- Text smiley conversion to Unicode emojis (`:)` -> 🙂 etc.)
+- Unread count badges on widget button and channel tabs
+- SSE real-time updates for all channel types
+
+### Changed
+- Council chat replaced by unified Messages widget - no separate `/council/[id]/chat` route
+- Message layout: Matrix/Element style (avatar + name above text, left-aligned)
+- API routes unified under `/api/messages/`
+
+---
+
 ## [0.6.1] - 2026-03-20
 
 ### Added

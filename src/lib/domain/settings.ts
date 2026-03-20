@@ -14,6 +14,8 @@ export interface GovernanceSettings {
     maxSize: number
     termLimitMonths: number // 0 = unlimited
     requiresElection: boolean
+    nominationWindowDays: number
+    recallSignaturePercent: number
   }
   voting: {
     thresholds: {
@@ -53,6 +55,10 @@ export interface GovernanceSettings {
   nation: {
     stage: string              // e.g. 'MVP', 'Beta', 'Active'
   }
+  chat: {
+    allowVisitors: boolean     // Whether visitors can participate in chat at all
+    visitorChannels: 'none' | 'readonly' | 'readwrite'
+  }
 }
 
 export const DEFAULT_GOVERNANCE_SETTINGS: GovernanceSettings = {
@@ -60,7 +66,9 @@ export const DEFAULT_GOVERNANCE_SETTINGS: GovernanceSettings = {
     minSize: 3,
     maxSize: 11,
     termLimitMonths: 24,
-    requiresElection: false
+    requiresElection: false,
+    nominationWindowDays: 7,
+    recallSignaturePercent: 0.15
   },
   voting: {
     thresholds: {
@@ -99,6 +107,10 @@ export const DEFAULT_GOVERNANCE_SETTINGS: GovernanceSettings = {
   },
   nation: {
     stage: 'MVP'
+  },
+  chat: {
+    allowVisitors: false,
+    visitorChannels: 'none'
   }
 }
 
@@ -107,6 +119,8 @@ export type SettingKey =
   | 'council.maxSize'
   | 'council.termLimitMonths'
   | 'council.requiresElection'
+  | 'council.nominationWindowDays'
+  | 'council.recallSignaturePercent'
   | 'voting.thresholds.constitution'
   | 'voting.thresholds.policy'
   | 'voting.thresholds.budget'
@@ -123,6 +137,8 @@ export type SettingKey =
   | 'citizenship.councilGracePeriodDays'
   | 'username.changeCooldownDays'
   | 'nation.stage'
+  | 'chat.allowVisitors'
+  | 'chat.visitorChannels'
 
 export interface SystemSettingUpdatedMeta {
   key: string

@@ -7,6 +7,10 @@ import {
   rejectCitizenshipApplication,
   isDebugMode
 } from '$lib/server/services/citizenship'
+import {
+  listAllCouncils,
+  setCouncilMembership
+} from '$lib/server/services/councils'
 import { sendVerificationEmail } from '$lib/server/email'
 import { createEmailVerificationToken } from 'better-auth/api'
 import { auth } from '$lib/server/auth'
@@ -18,7 +22,11 @@ export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users')))
     error(403, 'Forbidden')
 
-  const [users, applications] = await Promise.all([listUsers(), listAllApplications()])
+  const [users, applications, councils] = await Promise.all([
+    listUsers(),
+    listAllApplications(),
+    listAllCouncils()
+  ])
 
   // Build a map userId → application for quick lookup in the template
   const applicationsByUser = new Map(applications.map((a) => [a.userId, a]))
@@ -26,6 +34,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   return {
     users,
     applicationsByUser: Object.fromEntries(applicationsByUser),
+    councils,
     debugMode: isDebugMode()
   }
 }
@@ -93,6 +102,24 @@ export const actions: Actions = {
       return fail(400, { message: 'Cannot delete your own account.' })
     }
     await deleteUser(userId)
+    return { success: true }
+  },
+
+  setCouncilMembership: async ({ locals, request }) => {
+    if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users')))
+      error(403, 'Forbidden')
+    const data = await request.formData()
+    const userId = data.get('userId') as string
+    const unitId = data.get('unitId') as string
+    const isMember = data.get('isMember') === 'true'
+    if (!userId || !unitId) return fail(400, { message: 'Missing userId or unitId.' })
+
+    try {
+      await setCouncilMembership({ userId, unitId, isMember, adminId: locals.user.id })
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Unknown error'
+      return fail(400, { message })
+    }
     return { success: true }
   },
 

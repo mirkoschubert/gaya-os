@@ -63,6 +63,14 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
       { key: 'can_initiate_sanction_vote', label: 'Initiate sanction vote' },
       { key: 'can_manage_council', label: 'Manage council structure' }
     ]
+  },
+  {
+    label: 'Messages',
+    capabilities: [
+      { key: 'can_send_messages', label: 'Send messages' },
+      { key: 'can_start_dm', label: 'Start a direct message' },
+      { key: 'can_moderate_messages', label: 'Moderate messages (slash commands)' }
+    ]
   }
 ]
 
@@ -103,7 +111,10 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_review_proposals: false,
     can_initiate_internal_vote: false,
     can_initiate_sanction_vote: false,
-    can_manage_council: false
+    can_manage_council: false,
+    can_send_messages: false,
+    can_start_dm: false,
+    can_moderate_messages: false
   },
   CITIZEN: {
     has_profile: true,
@@ -129,7 +140,10 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_review_proposals: false,
     can_initiate_internal_vote: false,
     can_initiate_sanction_vote: false,
-    can_manage_council: false
+    can_manage_council: false,
+    can_send_messages: true,
+    can_start_dm: true,
+    can_moderate_messages: false
   },
   // COUNCIL_MEMBER row: only the extra rights beyond CITIZEN.
   // At runtime, capabilities are merged (OR) with the CITIZEN row via an
@@ -158,7 +172,10 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_review_proposals: true,
     can_initiate_internal_vote: true,
     can_initiate_sanction_vote: true,
-    can_manage_council: false
+    can_manage_council: false,
+    can_send_messages: false,
+    can_start_dm: false,
+    can_moderate_messages: false
   },
   // MODERATOR row: only the extra technical rights beyond CITIZEN.
   MODERATOR: {
@@ -185,7 +202,10 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_review_proposals: false,
     can_initiate_internal_vote: false,
     can_initiate_sanction_vote: false,
-    can_manage_council: false
+    can_manage_council: false,
+    can_send_messages: false,
+    can_start_dm: false,
+    can_moderate_messages: true
   },
   // ADMIN row: only the extra technical rights beyond CITIZEN.
   ADMIN: {
@@ -212,6 +232,9 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_review_proposals: false,
     can_initiate_internal_vote: false,
     can_initiate_sanction_vote: false,
-    can_manage_council: true
+    can_manage_council: true,
+    can_send_messages: false,
+    can_start_dm: false,
+    can_moderate_messages: true
   }
 }

@@ -22,6 +22,13 @@ export type AuditAction =
   | 'ROLE_CHANGED'
   | 'EMAIL_VERIFIED'
   | 'COUNCIL_DECISION'
+  | 'COUNCIL_MEMBER_ADDED'
+  | 'COUNCIL_MEMBER_REMOVED'
+  | 'COUNCIL_SESSION_CREATED'
+  | 'COUNCIL_INTERNAL_VOTE_CAST'
+  | 'COUNCIL_NOMINATION_SUBMITTED'
+  | 'PROPOSAL_REVIEWED_BY_COUNCIL'
+  | 'PROPOSAL_STATUS_CHANGED'
   | 'SYSTEM_SETTING_UPDATED'
   | 'ROLE_CAPABILITY_UPDATED'
   | 'CITIZEN_ID_MIGRATED'
@@ -48,6 +55,12 @@ export const ACTION_OPTIONS: { value: AuditAction | ''; label: string }[] = [
   { value: 'VOTE_CAST', label: 'Vote cast' },
   { value: 'DOCUMENT_VERSION_CREATED', label: 'Document version published' },
   { value: 'ROLE_CHANGED', label: 'Role changed' },
+  { value: 'COUNCIL_MEMBER_ADDED', label: 'Council member added' },
+  { value: 'COUNCIL_MEMBER_REMOVED', label: 'Council member removed' },
+  { value: 'COUNCIL_SESSION_CREATED', label: 'Council session created' },
+  { value: 'COUNCIL_INTERNAL_VOTE_CAST', label: 'Council vote cast' },
+  { value: 'COUNCIL_NOMINATION_SUBMITTED', label: 'Council nomination submitted' },
+  { value: 'PROPOSAL_REVIEWED_BY_COUNCIL', label: 'Proposal reviewed by council' },
   { value: 'SYSTEM_SETTING_UPDATED', label: 'Setting changed' },
   { value: 'ROLE_CAPABILITY_UPDATED', label: 'Permission changed' }
 ]
@@ -236,8 +249,78 @@ export function buildLogSentence(entry: ActivityEntry): LogSegment[] {
 
     case 'COUNCIL_DECISION': {
       const subject = m?.subject ?? 'a matter'
-      const outcome = m?.outcome ? ` — ${m.outcome}` : ''
+      const outcome = m?.outcome ? ` - ${m.outcome}` : ''
       return [{ type: 'text', value: `made a council decision on ${subject}${outcome}` }]
+    }
+
+    case 'COUNCIL_MEMBER_ADDED': {
+      const councilName = m?.councilName ?? 'a council'
+      const memberName = m?.memberName ?? '?'
+      return [
+        { type: 'text', value: `added ` },
+        { type: 'code', value: memberName },
+        { type: 'text', value: ` to council ` },
+        { type: 'code', value: councilName }
+      ]
+    }
+
+    case 'COUNCIL_MEMBER_REMOVED': {
+      const councilName = m?.councilName ?? 'a council'
+      const memberName = m?.memberName ?? '?'
+      return [
+        { type: 'text', value: `removed ` },
+        { type: 'code', value: memberName },
+        { type: 'text', value: ` from council ` },
+        { type: 'code', value: councilName }
+      ]
+    }
+
+    case 'COUNCIL_SESSION_CREATED': {
+      const title = m?.sessionTitle ?? 'a session'
+      const councilName = m?.councilName ?? 'a council'
+      return [
+        { type: 'text', value: 'created session ' },
+        { type: 'code', value: title },
+        { type: 'text', value: ' for council ' },
+        { type: 'code', value: councilName }
+      ]
+    }
+
+    case 'COUNCIL_INTERNAL_VOTE_CAST': {
+      const title = m?.voteTitle ?? 'an internal vote'
+      const councilName = m?.councilName ?? 'a council'
+      return [
+        { type: 'text', value: 'cast a vote on ' },
+        { type: 'code', value: title },
+        { type: 'text', value: ' in council ' },
+        { type: 'code', value: councilName }
+      ]
+    }
+
+    case 'COUNCIL_NOMINATION_SUBMITTED': {
+      const councilName = m?.councilName ?? 'a council'
+      const isSelf = m?.nominatedById === null || m?.nominatedById === undefined
+      return isSelf
+        ? [{ type: 'text', value: 'submitted a self-nomination for council ' }, { type: 'code', value: councilName }]
+        : [{ type: 'text', value: 'submitted a nomination for council ' }, { type: 'code', value: councilName }]
+    }
+
+    case 'PROPOSAL_REVIEWED_BY_COUNCIL': {
+      const title = m?.proposalTitle ?? 'a proposal'
+      const decision = m?.decision ?? 'reviewed'
+      const href = entry.entityId ? `/proposals/${entry.entityId}` : null
+      return href
+        ? [{ type: 'text', value: `${decision} proposal ` }, { type: 'code-link', value: title, href }]
+        : [{ type: 'text', value: `${decision} proposal ` }, { type: 'code', value: title }]
+    }
+
+    case 'PROPOSAL_STATUS_CHANGED': {
+      const title = m?.proposalTitle ?? 'a proposal'
+      const newStatus = m?.newStatus ?? '?'
+      const href = entry.entityId ? `/proposals/${entry.entityId}` : null
+      return href
+        ? [{ type: 'text', value: 'changed status of ' }, { type: 'code-link', value: title, href }, { type: 'text', value: ' to ' }, { type: 'code', value: newStatus }]
+        : [{ type: 'text', value: 'changed status of ' }, { type: 'code', value: title }, { type: 'text', value: ' to ' }, { type: 'code', value: newStatus }]
     }
 
     case 'SYSTEM_SETTING_UPDATED': {
