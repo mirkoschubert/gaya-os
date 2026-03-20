@@ -5,6 +5,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.6.1] - 2026-03-20
+
+### Added
+- `/history`: full-page scroll-snap layout (100dvh per section), dot navigator (fixed right), section separators
+
+### Changed
+- `/history`: Foundation Stone section uses `gaya-foundation-stone.webp` as full-bleed background
+- `app.css`: `overflow-x: hidden` moved from `body` to `html`
+
+---
+
 ## [0.6.0] - 2026-03-19
 
 ### Added
