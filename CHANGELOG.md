@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.7.2] 2026-03-21
+
+### Fixed
+- Fixed hidden images
+
+---
+
 ## [0.7.1] 2026-03-21
 
 ### Changed

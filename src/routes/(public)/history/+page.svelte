@@ -153,7 +153,7 @@
       </div>
 
       <div class="lg:hidden mt-4 rounded-2xl overflow-hidden aspect-video w-full">
-        <img src="/images/test-image.webp" alt="" class="w-full h-full object-cover" />
+        <img src="/images/gaya-history-story-01.webp" alt="" class="w-full h-full object-cover" />
       </div>
     </div>
   </div>
@@ -225,7 +225,7 @@
       </div>
 
       <div class="lg:hidden mt-4 rounded-2xl overflow-hidden aspect-video w-full">
-        <img src="/images/test-image.webp" alt="" class="w-full h-full object-cover" />
+        <img src="/images/gaya-history-story-02.webp" alt="" class="w-full h-full object-cover" />
       </div>
     </div>
   </div>
@@ -306,7 +306,7 @@
       </div>
 
       <div class="lg:hidden mt-4 rounded-2xl overflow-hidden aspect-video w-full">
-        <img src="/images/test-image.webp" alt="" class="w-full h-full object-cover" />
+        <img src="/images/gaya-history-story-03.webp" alt="" class="w-full h-full object-cover" />
       </div>
     </div>
   </div>
@@ -354,7 +354,7 @@
       </div>
 
       <div class="lg:hidden mt-4 rounded-2xl overflow-hidden aspect-video w-full">
-        <img src="/images/test-image.webp" alt="" class="w-full h-full object-cover" />
+        <img src="/images/gaya-history-story-04.webp" alt="" class="w-full h-full object-cover" />
       </div>
     </div>
   </div>
