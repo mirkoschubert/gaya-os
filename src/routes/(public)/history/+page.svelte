@@ -105,7 +105,7 @@
     badge="History"
     title="The Story of Civitas Gaya"
     subtitle="We were few when we awoke. No angels, no devils - just a few dozen confused people in metal corridors under alien light."
-    image="/images/gaya-small-city.webp"
+    image="/images/gaya-history.webp"
   />
 </div>
 
@@ -122,7 +122,7 @@
         data-parallax="0.15"
         style="top: 0; width: 52%; aspect-ratio: 16/9; will-change: transform;"
       >
-        <img src="/images/gaya-arrival.webp" alt="" class="w-full h-full object-cover" />
+        <img src="/images/gaya-history-story-01.webp" alt="" class="w-full h-full object-cover" />
       </div>
 
       <div
@@ -194,7 +194,7 @@
         data-parallax="0.12"
         style="top: clamp(1rem, 4vh, 3rem); width: 50%; aspect-ratio: 16/9; will-change: transform;"
       >
-        <img src="/images/test-image.webp" alt="" class="w-full h-full object-cover" />
+        <img src="/images/gaya-history-story-02.webp" alt="" class="w-full h-full object-cover" />
       </div>
 
       <div
@@ -266,7 +266,7 @@
         data-parallax="0.1"
         style="top: 0; width: 58%; aspect-ratio: 16/9; will-change: transform;"
       >
-        <img src="/images/test-image.webp" alt="" class="w-full h-full object-cover" />
+        <img src="/images/gaya-history-story-03.webp" alt="" class="w-full h-full object-cover" />
       </div>
 
       <div
@@ -325,7 +325,7 @@
         data-parallax="0.18"
         style="top: clamp(1rem, 3vh, 2.5rem); width: 50%; aspect-ratio: 16/9; will-change: transform;"
       >
-        <img src="/images/test-image.webp" alt="" class="w-full h-full object-cover" />
+        <img src="/images/gaya-history-story-04.webp" alt="" class="w-full h-full object-cover" />
       </div>
 
       <div
@@ -368,7 +368,7 @@
 >
   <div
     class="absolute inset-0"
-    style="background-image: url('/images/gaya-foundation-stone.webp'); background-size: cover; background-position: 70% center;"
+    style="background-image: url('/images/gaya-history-foundation-stone.webp'); background-size: cover; background-position: 70% center;"
   ></div>
   <div class="absolute inset-0 bg-black/20"></div>
   <div class="section-inner relative z-10">

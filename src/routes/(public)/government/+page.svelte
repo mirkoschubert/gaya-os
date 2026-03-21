@@ -15,6 +15,7 @@
   badge="Council-Democratic Republic in Exile"
   title="Government of Civitas Gaya"
   subtitle="Designed to prevent the concentration of power and to keep political authority directly accountable to those affected by decisions."
+  image="/images/gaya-government.webp"
 />
 
 <!-- ─── KEY FACTS ─────────────────────────────────────────── -->

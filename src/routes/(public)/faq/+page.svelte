@@ -13,6 +13,7 @@
   badge="Frequently Asked Questions"
   title="Questions about Civitas Gaya"
   subtitle="Everything you need to know about what we are, how we govern ourselves, and how to get involved."
+  image="/images/gaya-faq.webp"
 />
 
 <!-- ─── ABOUT ──────────────────────────────────────────────── -->

@@ -18,6 +18,7 @@
 <PublicHero
   badge="Laws & Regulations"
   title={data.title}
+  image="/images/gaya-law.webp"
   overlay="bg-black/65"
 >
   {#snippet afterTitle()}

@@ -5,6 +5,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.7.1] 2026-03-21
+
+### Changed
+- Better images for all public pages
+- All heroes now have individual images
+- Preperation for city images
+
+---
+
 ## [0.7.0] - 2026-03-20
 
 ### Added

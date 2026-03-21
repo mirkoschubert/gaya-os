@@ -14,6 +14,7 @@
   badge="Legal Documents"
   title="Laws & Regulations"
   subtitle="All laws, organic statutes and regulations of Civitas Gaya - adopted through transparent participatory processes and published as public record."
+  image="/images/gaya-law.webp"
 />
 
 <section

@@ -29,7 +29,7 @@
     primaryAction,
     secondaryAction,
     height = 'calc(100dvh - 3.5rem)',
-    overlay = 'bg-black/60',
+    overlay = 'bg-black/40',
     afterTitle
   }: Props = $props()
 

@@ -17,6 +17,7 @@
   badge="Council Democracy · Liquid Voting · Open Citizenship"
   title="Welcome to Civitas Gaya"
   subtitle="A micro-nation built on council democracy, liquid voting, and participatory budgeting - where every citizen shapes the nation."
+  image="/images/gaya-home.webp"
   primaryAction={data.user
     ? { href: '/dashboard', label: 'Go to Dashboard' }
     : { href: '/auth/register', label: 'Join Civitas Gaya' }}

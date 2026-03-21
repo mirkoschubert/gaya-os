@@ -251,7 +251,7 @@ async function seedNationalCouncil() {
     }
   })
 
-  await prisma.council.upsert({
+  const council = await prisma.council.upsert({
     where: { unitId: unit.id },
     update: { name: 'National Council', type: 'NATIONAL' },
     create: {
@@ -262,7 +262,17 @@ async function seedNationalCouncil() {
     }
   })
 
-  console.log(`Seeded Unit "${unit.name}" with National Council.`)
+  // Ensure the internal council channel exists
+  const existingChannel = await prisma.channel.findFirst({
+    where: { councilId: council.id, type: 'COUNCIL_INTERNAL' }
+  })
+  if (!existingChannel) {
+    await prisma.channel.create({
+      data: { councilId: council.id, type: 'COUNCIL_INTERNAL', name: 'National Council' }
+    })
+  }
+
+  console.log(`Seeded Unit "${unit.name}" with National Council and internal channel.`)
 }
 
 async function main() {

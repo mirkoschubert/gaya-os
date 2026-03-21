@@ -92,6 +92,7 @@
   badge="Get in Touch"
   title="Contact to Civitas Gaya"
   subtitle="Choose the address that best matches your request, or use the contact form below. We read everything."
+  image="/images/gaya-contact.webp"
 />
 
 <!-- ─── CONTACT ADDRESSES ─────────────────────────────────── -->

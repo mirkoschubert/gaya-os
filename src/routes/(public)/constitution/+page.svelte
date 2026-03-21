@@ -19,7 +19,8 @@
 <PublicHero
   badge="Founding Document"
   title={data.constitution?.title ?? 'Constitution of Civitas Gaya'}
-  height="calc(60dvh - 3.5rem)"
+  height="calc(100dvh - 3.5rem)"
+  image="/images/gaya-constitution.webp"
   overlay="bg-black/65"
 >
   {#snippet afterTitle()}
