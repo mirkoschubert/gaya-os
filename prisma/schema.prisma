@@ -73,6 +73,7 @@ enum ChannelType {
   CITIZEN_GENERAL  // The global citizen channel - always open, not closeable
   COUNCIL_PUBLIC   // Contact-a-council group DM - closeable by non-council members
   DIRECT_MESSAGE   // 1:1 DM - closeable
+  CITY_PUBLIC      // Public channel for a city - visible to all city members, not closeable
 }
 
 enum MessageReactionType {
@@ -147,6 +148,7 @@ model Unit {
   councils    Council[]
   proposals   Proposal[]
   budgets     Budget[]
+  city        City?
 }
 
 model Membership {
@@ -168,10 +170,13 @@ model Council {
   name             String
   type             CouncilType
   scopeDescription String?
+  banner           String?
+  cityId           String?     @unique
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
   unit             Unit                    @relation(fields: [unitId], references: [id])
+  city             City?                   @relation("CityCouncil", fields: [cityId], references: [id])
   sessions         CouncilSession[]
   nominations      CandidateNomination[]
   internalVotes    InternalVote[]
@@ -281,16 +286,19 @@ model InternalBallot {
 model Channel {
   id        String      @id @default(cuid())
   councilId String?
+  cityId    String?
   type      ChannelType @default(COUNCIL_INTERNAL)
   name      String?
   createdAt DateTime    @default(now())
 
   council  Council?            @relation(fields: [councilId], references: [id])
+  city     City?               @relation("CityChannel", fields: [cityId], references: [id])
   messages Message[]
   members  ChannelMembership[]
   mutes    ChannelMute[]
 
   @@index([councilId])
+  @@index([cityId])
 }
 
 model ChannelMembership {
@@ -481,6 +489,40 @@ model BudgetProject {
   budget Budget @relation(fields: [budgetId], references: [id])
 }
 
+model City {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  description String?
+  banner      String?
+  foundedAt   DateTime         @default(now())
+  active      Boolean          @default(false)
+  unitId      String           @unique
+
+  unit    Unit             @relation(fields: [unitId], references: [id])
+  council Council?         @relation("CityCouncil")
+  members CityMembership[]
+  channels Channel[]       @relation("CityChannel")
+
+  citizenshipApplications CitizenshipApplication[]
+
+  @@index([active])
+}
+
+model CityMembership {
+  id       String   @id @default(cuid())
+  cityId   String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  city City @relation(fields: [cityId], references: [id])
+  user user @relation(fields: [userId], references: [id])
+
+  @@unique([cityId, userId])
+  @@index([cityId])
+  @@index([userId])
+}
+
 model AuditLog {
   id         String   @id @default(cuid())
   userId     String?
@@ -495,6 +537,28 @@ model AuditLog {
   @@index([createdAt(sort: Desc)])
   @@index([userId, createdAt(sort: Desc)])
   @@index([action, createdAt(sort: Desc)])
+}
+
+enum PostEntityType {
+  CITY
+  COUNCIL
+  USER
+}
+
+model Post {
+  id         String         @id @default(cuid())
+  authorId   String
+  entityType PostEntityType
+  entityId   String
+  body       String
+  mediaUrls  Json?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  author user @relation(fields: [authorId], references: [id])
+
+  @@index([entityType, entityId, createdAt(sort: Desc)])
+  @@index([authorId])
 }
 
 model SystemSetting {
@@ -534,6 +598,7 @@ model CitizenshipApplication {
   lastName       String
   country        String
   city           String?
+  cityId         String?           // chosen City entity during application
   motivationText String
   status         CitizenshipStatus @default(PENDING)
   flags          Json?             // ApplicationFlag[]
@@ -549,6 +614,7 @@ model CitizenshipApplication {
 
   user     user  @relation("CitizenshipApplicant", fields: [userId], references: [id], onDelete: Cascade)
   reviewer user? @relation("CitizenshipReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  chosenCity City? @relation(fields: [cityId], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt(sort: Desc)])
   @@index([ipAddress, createdAt(sort: Desc)])
@@ -635,12 +701,14 @@ model user {
   joinedAt    DateTime?
   lastLogin   DateTime?
   // Profile additionalFields
-  bio         String?
-  location    String?
-  links       Json?
-  avatarUrl   String?
-  heroUrl     String?
-  showRealName Boolean  @default(true)
+  bio              String?
+  location         String?
+  locationCity     String?
+  locationCountry  String?
+  links            Json?
+  avatarUrl        String?
+  heroUrl          String?
+  showRealName     Boolean  @default(true)
 
   sessions         session[]
   accounts         account[]
@@ -656,12 +724,14 @@ model user {
   usernameChanges        UsernameChangeLog[]
   usernameBlacklists     UsernameBlacklist[]
   memberships            Membership[]
+  cityMemberships        CityMembership[]
   councilRepresentatives CouncilRepresentative[]
   channelMemberships     ChannelMembership[]
   messages               Message[]
   messageReactions       MessageReaction[]
   channelMutesReceived   ChannelMute[]           @relation("ChannelMuteTarget")
   channelMutesMade       ChannelMute[]           @relation("ChannelMutedBy")
+  posts                  Post[]
 }
 
 model session {

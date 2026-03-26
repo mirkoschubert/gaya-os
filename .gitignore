@@ -33,3 +33,6 @@ vite.config.ts.timestamp-*
 # Claude
 .claude
 CLAUDE.md
+
+# Custom
+gaya-os-feature-plan.md

@@ -22,6 +22,7 @@ export type AuditAction =
   | 'ROLE_CHANGED'
   | 'EMAIL_VERIFIED'
   | 'COUNCIL_DECISION'
+  | 'COUNCIL_UPDATED'
   | 'COUNCIL_MEMBER_ADDED'
   | 'COUNCIL_MEMBER_REMOVED'
   | 'COUNCIL_SESSION_CREATED'
@@ -32,6 +33,15 @@ export type AuditAction =
   | 'SYSTEM_SETTING_UPDATED'
   | 'ROLE_CAPABILITY_UPDATED'
   | 'CITIZEN_ID_MIGRATED'
+  | 'CITY_CREATED'
+  | 'CITY_UPDATED'
+  | 'CITY_ACTIVATED'
+  | 'CITY_DEACTIVATED'
+  | 'CITY_DELETED'
+  | 'CITY_MEMBER_ADDED'
+  | 'CITY_MEMBER_REMOVED'
+  | 'POST_CREATED'
+  | 'POST_DELETED'
 
 // A log sentence is a list of segments — rendered inline.
 export type LogSegment =
@@ -62,7 +72,16 @@ export const ACTION_OPTIONS: { value: AuditAction | ''; label: string }[] = [
   { value: 'COUNCIL_NOMINATION_SUBMITTED', label: 'Council nomination submitted' },
   { value: 'PROPOSAL_REVIEWED_BY_COUNCIL', label: 'Proposal reviewed by council' },
   { value: 'SYSTEM_SETTING_UPDATED', label: 'Setting changed' },
-  { value: 'ROLE_CAPABILITY_UPDATED', label: 'Permission changed' }
+  { value: 'ROLE_CAPABILITY_UPDATED', label: 'Permission changed' },
+  { value: 'CITY_CREATED', label: 'City created' },
+  { value: 'CITY_UPDATED', label: 'City updated' },
+  { value: 'CITY_ACTIVATED', label: 'City activated' },
+  { value: 'CITY_DEACTIVATED', label: 'City deactivated' },
+  { value: 'CITY_DELETED', label: 'City deleted' },
+  { value: 'CITY_MEMBER_ADDED', label: 'City member added' },
+  { value: 'CITY_MEMBER_REMOVED', label: 'City member removed' },
+  { value: 'POST_CREATED', label: 'Post created' },
+  { value: 'POST_DELETED', label: 'Post deleted' }
 ]
 
 export interface ActivityUser {
@@ -359,6 +378,72 @@ export function buildLogSentence(entry: ActivityEntry): LogSegment[] {
         segments.push({ type: 'text', value: ` (was ${oldValue}, now ${newValue})` })
       }
       return segments
+    }
+
+    case 'CITY_CREATED': {
+      const name = m?.cityName ?? 'a city'
+      return [{ type: 'text', value: 'created city ' }, { type: 'code', value: name }]
+    }
+
+    case 'CITY_UPDATED': {
+      const name = m?.cityName ?? 'a city'
+      return [{ type: 'text', value: 'updated city ' }, { type: 'code', value: name }]
+    }
+
+    case 'CITY_ACTIVATED': {
+      const name = m?.cityName ?? 'a city'
+      const href = m?.citySlug ? `/nation/cities/${m.citySlug}` : null
+      return href
+        ? [{ type: 'text', value: 'activated city ' }, { type: 'code-link', value: name, href }]
+        : [{ type: 'text', value: 'activated city ' }, { type: 'code', value: name }]
+    }
+
+    case 'CITY_DEACTIVATED': {
+      const name = m?.cityName ?? 'a city'
+      return [{ type: 'text', value: 'deactivated city ' }, { type: 'code', value: name }]
+    }
+
+    case 'CITY_DELETED': {
+      const cityName = m?.cityName ?? 'a city'
+      return [{ type: 'text', value: `deleted city ` }, { type: 'code', value: cityName }]
+    }
+
+    case 'CITY_MEMBER_ADDED': {
+      const memberName = m?.memberName ?? '?'
+      const cityName = m?.cityName ?? 'a city'
+      const href = m?.citySlug ? `/nation/cities/${m.citySlug}` : null
+      return href
+        ? [{ type: 'text', value: 'added ' }, { type: 'code', value: memberName }, { type: 'text', value: ' to city ' }, { type: 'code-link', value: cityName, href }]
+        : [{ type: 'text', value: 'added ' }, { type: 'code', value: memberName }, { type: 'text', value: ' to city ' }, { type: 'code', value: cityName }]
+    }
+
+    case 'CITY_MEMBER_REMOVED': {
+      const memberName = m?.memberName ?? '?'
+      const cityName = m?.cityName ?? 'a city'
+      return [
+        { type: 'text', value: 'removed ' },
+        { type: 'code', value: memberName },
+        { type: 'text', value: ' from city ' },
+        { type: 'code', value: cityName }
+      ]
+    }
+
+    case 'POST_CREATED': {
+      const entityType = m?.entityType ?? 'entity'
+      const entityName = m?.entityName ?? '?'
+      return [
+        { type: 'text', value: `posted an announcement on ${entityType.toLowerCase()} ` },
+        { type: 'code', value: entityName }
+      ]
+    }
+
+    case 'POST_DELETED': {
+      const entityType = m?.entityType ?? 'entity'
+      const entityName = m?.entityName ?? '?'
+      return [
+        { type: 'text', value: `deleted a post on ${entityType.toLowerCase()} ` },
+        { type: 'code', value: entityName }
+      ]
     }
 
     default:

@@ -5,6 +5,28 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.8.0] - 2026-03-26
+
+### Added
+- Cities: city directory, city profile pages (banner, description, members, activity), city admin CRUD with banner upload
+- City membership: Citizens can join/leave cities; city member count shown in directory
+- City channel: CITY_PUBLIC chat channel per city, accessible via city profile; appears in Messages widget for members
+- Post/Announcement system: text + media posts on City profiles (by City Council members), Council profiles (by Council members), and Citizen profiles (own feed); PostComposer + PostFeed components with Markdown rendering and media grid
+- Post media upload endpoint (`/api/upload/post-media`) supporting images and video
+- Nation directory restructured: `/nation` combined overview (tabs: Cities, Councils, Citizens, Visitors); individual list routes `/nation/cities`, `/nation/councils`, `/nation/citizens`, `/nation/visitors`
+- Social links redesign: platform dropdown with arcticons icons (Bluesky, Mastodon, Matrix, Signal, XMPP, PeerTube, Misskey, Diaspora, Funkwhale, Briar, Website, Email, Other); smart URL generation per platform
+- Country name display on citizen profiles (code resolved to full name)
+- Inactive cities shown as grayed-out cards in directory and as disabled options in ID card city select
+- Breadcrumbs corrected across all Nation profile pages
+
+### Changed
+- Profile edits (bio, location, links, avatar, banner) now reflect immediately without page reload via `onSaved` callback
+- "Change banner" standalone buttons removed from all profile pages - banner upload is now inside Edit Profile modal
+- Profile Info and Profile Media sections removed from `/settings/profile` (now managed via profile page modal)
+- Nav menu "Nation" link updated to `/nation`; active state matches all `/nation/*` routes
+
+---
+
 ## [0.7.2] 2026-03-21
 
 ### Fixed

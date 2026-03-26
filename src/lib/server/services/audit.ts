@@ -38,12 +38,16 @@ export async function listActivity(options?: {
   pageSize?: number
   action?: string
   userId?: string
+  entityType?: string
+  entityId?: string
 }): Promise<ActivityPage> {
   const pageSize = options?.pageSize ?? 25
 
   const where = {
     ...(options?.action ? { action: options.action } : {}),
-    ...(options?.userId ? { userId: options.userId } : {})
+    ...(options?.userId ? { userId: options.userId } : {}),
+    ...(options?.entityType ? { entityType: options.entityType } : {}),
+    ...(options?.entityId ? { entityId: options.entityId } : {})
   }
 
   // Fetch one extra to know if there's a next page

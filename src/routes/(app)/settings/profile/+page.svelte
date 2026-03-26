@@ -1,17 +1,13 @@
 <script lang="ts">
   import { authClient, useSession } from '$lib/auth-client'
-  import { page } from '$app/state'
   import { enhance } from '$app/forms'
-  import type { AppUser, ProfileLink } from '$lib/domain/auth'
+  import type { AppUser } from '$lib/domain/auth'
   import * as Card from '$lib/components/ui/card'
-  import * as Avatar from '$lib/components/ui/avatar'
-  import * as Switch from '$lib/components/ui/switch'
   import { Button } from '$lib/components/ui/button'
   import { Input } from '$lib/components/ui/input'
   import { Label } from '$lib/components/ui/label'
-  import { Textarea } from '$lib/components/ui/textarea'
   import { Separator } from '$lib/components/ui/separator'
-  import { TriangleAlert, Plus, Trash2, Upload, Eye, EyeOff, CircleCheck, CircleX, LoaderCircle } from '@lucide/svelte'
+  import { TriangleAlert, Eye, EyeOff, CircleCheck, CircleX, LoaderCircle } from '@lucide/svelte'
   import type { PageData, ActionData } from './$types'
 
   interface Props {
@@ -24,8 +20,6 @@
   const session = useSession()
 
   const user = $derived($session.data?.user as AppUser | undefined)
-  const caps = $derived((page.data as { caps?: Record<string, boolean> }).caps ?? {})
-  const canEditProfile = $derived(caps['can_edit_own_profile'] ?? false)
   const emailVerified = $derived(($session.data?.user as { emailVerified?: boolean } | undefined)?.emailVerified ?? true)
 
   // ─── Email verification ───
@@ -132,108 +126,6 @@
         usernameStatus = 'idle'
       }
     }, 300)
-  }
-
-  // ─── Profile Info ───
-  let bio = $state('')
-  let location = $state('')
-  let links = $state<ProfileLink[]>([])
-  let showRealName = $state(true)
-  let profileLoading = $state(false)
-  let profileError = $state<string | null>(null)
-  let profileSuccess = $state(false)
-
-  function parseLinks(raw: unknown): ProfileLink[] {
-    if (!raw) return []
-    if (Array.isArray(raw)) return raw as ProfileLink[]
-    if (typeof raw === 'string') { try { return JSON.parse(raw) } catch { return [] } }
-    return []
-  }
-
-  $effect(() => {
-    if (user) {
-      bio = user.bio ?? ''
-      location = user.location ?? ''
-      links = parseLinks(user.links)
-      showRealName = user.showRealName ?? true
-    }
-  })
-
-  function addLink() { links = [...links, { label: '', url: '' }] }
-  function removeLink(index: number) { links = links.filter((_, i) => i !== index) }
-
-  async function handleUpdateProfile(e: Event) {
-    e.preventDefault()
-    profileLoading = true
-    profileError = null
-    profileSuccess = false
-    const validLinks = links.filter((l) => l.label.trim() && l.url.trim())
-    const result = await authClient.updateUser({
-      bio: bio || null,
-      location: location || null,
-      links: JSON.stringify(validLinks),
-      showRealName
-    } as Parameters<typeof authClient.updateUser>[0])
-    if (result.error) {
-      profileError = result.error.message ?? 'Failed to update profile info.'
-    } else {
-      profileSuccess = true
-    }
-    profileLoading = false
-  }
-
-  // ─── Avatar + Hero upload ───
-  let avatarLoading = $state(false)
-  let avatarError = $state<string | null>(null)
-  let avatarSuccess = $state(false)
-  let avatarInput: HTMLInputElement | undefined = $state()
-  let localAvatarUrl = $state<string | null>(null)
-
-  let heroLoading = $state(false)
-  let heroError = $state<string | null>(null)
-  let heroSuccess = $state(false)
-  let heroInput: HTMLInputElement | undefined = $state()
-  let localHeroUrl = $state<string | null>(null)
-
-  $effect(() => { if (user?.avatarUrl) localAvatarUrl = user.avatarUrl })
-  $effect(() => { if (user?.heroUrl) localHeroUrl = user.heroUrl })
-
-  async function handleAvatarUpload(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0]
-    if (!file) return
-    avatarLoading = true; avatarError = null; avatarSuccess = false
-    const formData = new FormData()
-    formData.append('file', file)
-    const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      avatarError = data.error ?? 'Upload failed.'
-    } else {
-      const data = await res.json()
-      localAvatarUrl = data.url
-      avatarSuccess = true
-      await $session.refetch()
-    }
-    avatarLoading = false
-  }
-
-  async function handleHeroUpload(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0]
-    if (!file) return
-    heroLoading = true; heroError = null; heroSuccess = false
-    const formData = new FormData()
-    formData.append('file', file)
-    const res = await fetch('/api/upload/hero', { method: 'POST', body: formData })
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      heroError = data.error ?? 'Upload failed.'
-    } else {
-      const data = await res.json()
-      localHeroUrl = data.url
-      heroSuccess = true
-      await $session.refetch()
-    }
-    heroLoading = false
   }
 
   // ─── Password ───
@@ -415,110 +307,6 @@
     </Card.Content>
   </Card.Root>
 
-  {#if canEditProfile}
-  <!-- Profile Info -->
-  <Card.Root>
-    <Card.Header>
-      <Card.Title>Profile Info</Card.Title>
-      <Card.Description>Customize what others see on your public profile.</Card.Description>
-    </Card.Header>
-    <Card.Content>
-      <form onsubmit={handleUpdateProfile} class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <Label for="bio">Bio</Label>
-          <Textarea id="bio" placeholder="Tell others a bit about yourself…" bind:value={bio} rows={3} />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <Label for="location">Location</Label>
-          <Input id="location" type="text" placeholder="e.g. Berlin, Germany" bind:value={location} />
-        </div>
-        <div class="flex flex-col gap-2">
-          <Label>Links</Label>
-          {#each links as link, i}
-            <div class="flex gap-2">
-              <Input type="text" placeholder="Label" bind:value={link.label} class="w-32 shrink-0" />
-              <Input type="url" placeholder="https://…" bind:value={link.url} class="flex-1" />
-              <Button type="button" variant="ghost" size="icon" onclick={() => removeLink(i)}>
-                <Trash2 class="size-4" />
-              </Button>
-            </div>
-          {/each}
-          <Button type="button" variant="outline" size="sm" onclick={addLink} class="self-start">
-            <Plus class="size-4" />Add link
-          </Button>
-        </div>
-        <div class="flex items-center justify-between rounded-lg border p-3">
-          <div>
-            <p class="text-sm font-medium">Show real name</p>
-            <p class="text-muted-foreground text-xs">Display your first and last name on your profile instead of your username.</p>
-          </div>
-          <Switch.Root id="showRealName" checked={showRealName} onCheckedChange={(v) => (showRealName = v)} />
-        </div>
-        {#if profileError}<p class="text-destructive text-sm">{profileError}</p>{/if}
-        {#if profileSuccess}<p class="text-sm text-green-600">Profile info updated.</p>{/if}
-        <Button type="submit" disabled={profileLoading} class="self-start">
-          {profileLoading ? 'Saving…' : 'Save profile info'}
-        </Button>
-      </form>
-    </Card.Content>
-  </Card.Root>
-
-  <!-- Profile Picture + Banner -->
-  <Card.Root>
-    <Card.Header>
-      <Card.Title>Profile Media</Card.Title>
-      <Card.Description>Profile picture (max 2 MB) and banner image (max 5 MB). JPG/PNG/WebP.</Card.Description>
-    </Card.Header>
-    <Card.Content class="space-y-6">
-      <!-- Avatar -->
-      <div>
-        <p class="text-sm font-medium mb-3">Profile Picture</p>
-        <div class="flex items-center gap-4">
-          <Avatar.Root class="size-16">
-            {#if localAvatarUrl}
-              <Avatar.Image src={localAvatarUrl} alt={user?.name} />
-            {/if}
-            <Avatar.Fallback class="text-lg">{initials(user?.name ?? '?')}</Avatar.Fallback>
-          </Avatar.Root>
-          <div class="flex flex-col gap-2">
-            <input bind:this={avatarInput} type="file" accept="image/jpeg,image/png,image/webp" class="hidden" onchange={handleAvatarUpload} />
-            <Button type="button" variant="outline" size="sm" disabled={avatarLoading} onclick={() => avatarInput?.click()}>
-              <Upload class="size-4" />{avatarLoading ? 'Uploading…' : 'Upload picture'}
-            </Button>
-            {#if avatarError}<p class="text-destructive text-xs">{avatarError}</p>{/if}
-            {#if avatarSuccess}<p class="text-xs text-green-600">Picture updated.</p>{/if}
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      <!-- Banner -->
-      <div>
-        <p class="text-sm font-medium mb-3">Profile Banner</p>
-        <div class="flex flex-col gap-3">
-          {#if localHeroUrl}
-            <div class="h-24 w-full overflow-hidden rounded-md border">
-              <img src={localHeroUrl} alt="Profile banner" class="h-full w-full object-cover" />
-            </div>
-          {:else}
-            <div class="flex h-24 w-full items-center justify-center rounded-md border bg-linear-to-br from-primary/20 to-primary/5">
-              <p class="text-muted-foreground text-xs">No banner set</p>
-            </div>
-          {/if}
-          <div>
-            <input bind:this={heroInput} type="file" accept="image/jpeg,image/png,image/webp" class="hidden" onchange={handleHeroUpload} />
-            <Button type="button" variant="outline" size="sm" disabled={heroLoading} onclick={() => heroInput?.click()}>
-              <Upload class="size-4" />{heroLoading ? 'Uploading…' : 'Upload banner'}
-            </Button>
-            {#if heroError}<p class="text-destructive text-xs">{heroError}</p>{/if}
-            {#if heroSuccess}<p class="text-xs text-green-600">Banner updated.</p>{/if}
-          </div>
-        </div>
-      </div>
-    </Card.Content>
-  </Card.Root>
-  {/if}
 
   <!-- Password -->
   <Card.Root>

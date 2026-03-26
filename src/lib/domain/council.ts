@@ -78,6 +78,7 @@ export interface CouncilDetail {
   name: string
   type: CouncilType
   scopeDescription: string | null
+  banner: string | null
   createdAt: Date
   members: CouncilMember[]
   representatives: CouncilRepresentativeEntry[]

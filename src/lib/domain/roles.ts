@@ -19,6 +19,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
     label: 'Profile',
     capabilities: [
       { key: 'has_profile', label: 'Has a profile' },
+      { key: 'can_list_in_nation', label: 'Listed in Nation directory' },
       { key: 'can_view_profiles', label: 'View profiles' },
       { key: 'can_edit_own_profile', label: 'Edit own profile' },
       { key: 'can_delete_own_account', label: 'Delete own account' }
@@ -50,6 +51,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
       { key: 'can_manage_users', label: 'Manage users' },
       { key: 'can_manage_documents', label: 'Manage documents' },
       { key: 'can_manage_settings', label: 'Manage settings' },
+      { key: 'can_manage_cities', label: 'Manage cities' },
       { key: 'can_moderate_content', label: 'Moderate content' }
     ]
   },
@@ -89,6 +91,7 @@ export interface RoleCapabilityUpdatedMeta {
 export const DEFAULT_MATRIX: PermissionMatrix = {
   VISITOR: {
     has_profile: false,
+    can_list_in_nation: false,
     can_view_profiles: true,
     can_edit_own_profile: false,
     can_delete_own_account: false,
@@ -105,6 +108,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_manage_users: false,
     can_manage_documents: false,
     can_manage_settings: false,
+    can_manage_cities: false,
     can_moderate_content: false,
     can_run_for_council: false,
     can_view_council_dashboard: false,
@@ -118,6 +122,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
   },
   CITIZEN: {
     has_profile: true,
+    can_list_in_nation: true,
     can_view_profiles: true,
     can_edit_own_profile: true,
     can_delete_own_account: true,
@@ -134,6 +139,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_manage_users: false,
     can_manage_documents: false,
     can_manage_settings: false,
+    can_manage_cities: false,
     can_moderate_content: false,
     can_run_for_council: true,
     can_view_council_dashboard: false,
@@ -150,6 +156,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
   // isCouncilMember flag in +layout.server.ts.
   COUNCIL_MEMBER: {
     has_profile: false,
+    can_list_in_nation: false,
     can_view_profiles: false,
     can_edit_own_profile: false,
     can_delete_own_account: false,
@@ -166,6 +173,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_manage_users: false,
     can_manage_documents: false,
     can_manage_settings: false,
+    can_manage_cities: false,
     can_moderate_content: false,
     can_run_for_council: false,
     can_view_council_dashboard: true,
@@ -180,6 +188,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
   // MODERATOR row: only the extra technical rights beyond CITIZEN.
   MODERATOR: {
     has_profile: false,
+    can_list_in_nation: false,
     can_view_profiles: false,
     can_edit_own_profile: false,
     can_delete_own_account: false,
@@ -196,6 +205,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_manage_users: false,
     can_manage_documents: false,
     can_manage_settings: false,
+    can_manage_cities: false,
     can_moderate_content: true,
     can_run_for_council: false,
     can_view_council_dashboard: false,
@@ -210,6 +220,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
   // ADMIN row: only the extra technical rights beyond CITIZEN.
   ADMIN: {
     has_profile: false,
+    can_list_in_nation: false,
     can_view_profiles: false,
     can_edit_own_profile: false,
     can_delete_own_account: false,
@@ -226,6 +237,7 @@ export const DEFAULT_MATRIX: PermissionMatrix = {
     can_manage_users: true,
     can_manage_documents: true,
     can_manage_settings: true,
+    can_manage_cities: true,
     can_moderate_content: true,
     can_run_for_council: false,
     can_view_council_dashboard: true,

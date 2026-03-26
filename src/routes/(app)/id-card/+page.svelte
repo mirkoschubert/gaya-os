@@ -10,6 +10,7 @@
   import { Textarea } from '$lib/components/ui/textarea'
   import { Checkbox } from '$lib/components/ui/checkbox'
   import { Separator } from '$lib/components/ui/separator'
+  import * as Select from '$lib/components/ui/select'
   import { countries } from 'countries-list'
 
   let { data, form }: { data: PageData; form: ActionData } = $props()
@@ -55,6 +56,9 @@
       .sort((a, b) => a.name.localeCompare(b.name)),
     { code: 'OTHER', name: 'Other / Not listed' }
   ]
+
+  // Gaya city selection
+  let selectedCityId = $state('')
 
   // Searchable country field state
   let countrySearch = $state('')
@@ -339,8 +343,37 @@
 
             <!-- City (required) -->
             <div class="space-y-1.5">
-              <Label for="city">City <span class="text-destructive">*</span></Label>
+              <Label for="city">City of residence <span class="text-destructive">*</span></Label>
               <Input id="city" name="city" placeholder="London" required maxlength={80} />
+            </div>
+
+            <!-- Gaya city (required) -->
+            <div class="space-y-1.5">
+              <Label>City of Gaya <span class="text-destructive">*</span></Label>
+              <input type="hidden" name="cityId" value={selectedCityId} />
+              <Select.Root
+                type="single"
+                value={selectedCityId}
+                onValueChange={(v) => (selectedCityId = v ?? '')}
+              >
+                <Select.Trigger class="w-full">
+                  {#if selectedCityId}
+                    {data.cities.find((c) => c.id === selectedCityId)?.name ?? 'Select a city'}
+                  {:else}
+                    Select a city
+                  {/if}
+                </Select.Trigger>
+                <Select.Content>
+                  {#each data.cities as c (c.id)}
+                    <Select.Item value={c.id} disabled={!c.active}>
+                      {c.name}{!c.active ? ' (coming soon)' : ''}
+                    </Select.Item>
+                  {/each}
+                </Select.Content>
+              </Select.Root>
+              <p class="text-muted-foreground text-xs">
+                Choose the city you want to join. This determines which city council and proposals you participate in.
+              </p>
             </div>
 
             <!-- Motivation -->
@@ -385,7 +418,7 @@
               <Button
                 type="submit"
                 class="flex-1"
-                disabled={!selectedCountry}
+                disabled={!selectedCountry || !selectedCityId}
               >
                 Submit Application
               </Button>

@@ -26,6 +26,7 @@ export type AdminUserView = {
   technicalProfile: TechnicalProfileView | null
   applicationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | null
   councilMemberships: { unitId: string; councilId: string; councilName: string }[]
+  cityMemberships: { cityId: string; cityName: string }[]
 }
 
 export async function listUsers(): Promise<AdminUserView[]> {
@@ -66,6 +67,12 @@ export async function listUsers(): Promise<AdminUserView[]> {
             }
           }
         }
+      },
+      cityMemberships: {
+        select: {
+          cityId: true,
+          city: { select: { name: true } }
+        }
       }
     }
   })
@@ -81,7 +88,8 @@ export async function listUsers(): Promise<AdminUserView[]> {
     applicationStatus: (u.citizenshipApplication?.status as AdminUserView['applicationStatus']) ?? null,
     councilMemberships: u.memberships.flatMap((m) =>
       m.unit.councils.map((c) => ({ unitId: m.unitId, councilId: c.id, councilName: c.name }))
-    )
+    ),
+    cityMemberships: u.cityMemberships.map((m) => ({ cityId: m.cityId, cityName: m.city.name }))
   }))
 }
 
@@ -92,8 +100,14 @@ export async function setUserRole(
 ): Promise<void> {
   const previous = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { role: true }
+    select: { role: true, civicStatus: true }
   })
+
+  // MODERATOR and ADMIN roles require the user to already be a citizen.
+  if ((role === 'MODERATOR' || role === 'ADMIN') && previous.civicStatus !== 'CITIZEN') {
+    throw new Error('User must be a citizen before being promoted to Moderator or Admin.')
+  }
+
   await prisma.user.update({ where: { id: userId }, data: { role } })
   await logAction({
     userId: actorId ?? userId,
