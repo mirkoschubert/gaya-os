@@ -2,8 +2,172 @@ export type UserRole = 'USER' | 'MODERATOR' | 'ADMIN'
 export type CivicStatus = 'VISITOR' | 'CITIZEN'
 
 export interface ProfileLink {
+  label: string // platform key, e.g. 'bluesky'
+  url: string   // raw value: full URL, handle, or identifier depending on platform
+}
+
+export interface LinkType {
+  value: string
   label: string
-  url: string
+  iconName: string        // arcticons icon name, e.g. 'arcticons:bluesky'
+  placeholder: string     // shown in input field
+  inputLabel: string      // describes what to enter
+  linkable: boolean       // false = display-only (no href)
+  // builds the href from the raw value; null = use raw value as-is (already a URL)
+  buildHref: ((value: string) => string | null) | null
+}
+
+export const LINK_TYPES: LinkType[] = [
+  {
+    value: 'website',
+    label: 'Website',
+    iconName: 'arcticons:xbrowser',
+    placeholder: 'https://example.com',
+    inputLabel: 'URL',
+    linkable: true,
+    buildHref: null,
+  },
+  {
+    value: 'bluesky',
+    label: 'Bluesky',
+    iconName: 'arcticons:bluesky',
+    placeholder: '@you.bsky.social',
+    inputLabel: 'Handle (e.g. @you.bsky.social)',
+    linkable: true,
+    buildHref: (v) => {
+      const handle = v.replace(/^@/, '').trim()
+      return handle ? `https://bsky.app/profile/${handle}` : null
+    },
+  },
+  {
+    value: 'mastodon',
+    label: 'Mastodon',
+    iconName: 'arcticons:mastodon',
+    placeholder: '@you@instance.social',
+    inputLabel: 'Handle (e.g. @you@instance.social)',
+    linkable: true,
+    buildHref: (v) => {
+      // @user@instance.social -> https://instance.social/@user
+      const m = v.replace(/^@/, '').match(/^([^@]+)@(.+)$/)
+      return m ? `https://${m[2]}/@${m[1]}` : null
+    },
+  },
+  {
+    value: 'matrix',
+    label: 'Matrix / Element',
+    iconName: 'arcticons:element',
+    placeholder: '@you:matrix.org',
+    inputLabel: 'Matrix ID (e.g. @you:matrix.org)',
+    linkable: true,
+    buildHref: (v) => {
+      const id = v.startsWith('@') ? v : `@${v}`
+      return `https://matrix.to/#/${id}`
+    },
+  },
+  {
+    value: 'xmpp',
+    label: 'XMPP',
+    iconName: 'arcticons:xmpp',
+    placeholder: 'you@jabber.org',
+    inputLabel: 'JID (e.g. you@jabber.org)',
+    linkable: false,
+    buildHref: null,
+  },
+  {
+    value: 'signal',
+    label: 'Signal',
+    iconName: 'arcticons:signal',
+    placeholder: 'signal.me/u/... or username',
+    inputLabel: 'Signal username or signal.me link',
+    linkable: true,
+    buildHref: (v) => {
+      if (v.startsWith('http')) return v
+      return `https://signal.me/#p/${v}`
+    },
+  },
+  {
+    value: 'peertube',
+    label: 'PeerTube',
+    iconName: 'arcticons:peertube',
+    placeholder: '@you@instance.tv',
+    inputLabel: 'Handle (e.g. @you@peertube.tv)',
+    linkable: true,
+    buildHref: (v) => {
+      const m = v.replace(/^@/, '').match(/^([^@]+)@(.+)$/)
+      return m ? `https://${m[2]}/@${m[1]}` : null
+    },
+  },
+  {
+    value: 'misskey',
+    label: 'Misskey / Calckey',
+    iconName: 'arcticons:misskey',
+    placeholder: '@you@misskey.io',
+    inputLabel: 'Handle (e.g. @you@misskey.io)',
+    linkable: true,
+    buildHref: (v) => {
+      const m = v.replace(/^@/, '').match(/^([^@]+)@(.+)$/)
+      return m ? `https://${m[2]}/@${m[1]}` : null
+    },
+  },
+  {
+    value: 'diaspora',
+    label: 'Diaspora',
+    iconName: 'arcticons:diaspora',
+    placeholder: 'you@pod.example.com',
+    inputLabel: 'Handle (e.g. you@joindiaspora.com)',
+    linkable: true,
+    buildHref: (v) => {
+      const handle = v.replace(/^@/, '').trim()
+      const m = handle.match(/^([^@]+)@(.+)$/)
+      return m ? `https://${m[2]}/u/${m[1]}` : null
+    },
+  },
+  {
+    value: 'funkwhale',
+    label: 'Funkwhale',
+    iconName: 'arcticons:funkwhale',
+    placeholder: '@you@open.audio',
+    inputLabel: 'Handle (e.g. @you@open.audio)',
+    linkable: true,
+    buildHref: (v) => {
+      const m = v.replace(/^@/, '').match(/^([^@]+)@(.+)$/)
+      return m ? `https://${m[2]}/@${m[1]}` : null
+    },
+  },
+  {
+    value: 'briar',
+    label: 'Briar',
+    iconName: 'arcticons:briar',
+    placeholder: 'briar:// link or nickname',
+    inputLabel: 'Briar link or nickname',
+    linkable: false,
+    buildHref: null,
+  },
+  {
+    value: 'email',
+    label: 'E-Mail',
+    iconName: 'arcticons:fairemail',
+    placeholder: 'you@example.com',
+    inputLabel: 'E-mail address',
+    linkable: true,
+    buildHref: (v) => `mailto:${v.trim()}`,
+  },
+  {
+    value: 'other',
+    label: 'Other',
+    iconName: 'arcticons:xbrowser',
+    placeholder: 'https://...',
+    inputLabel: 'URL',
+    linkable: true,
+    buildHref: null,
+  },
+]
+
+export function getLinkHref(type: string, value: string): string | null {
+  const def = LINK_TYPES.find((t) => t.value === type)
+  if (!def || !def.linkable) return null
+  if (def.buildHref) return def.buildHref(value)
+  return value || null
 }
 
 export interface AppUser {
@@ -22,6 +186,8 @@ export interface AppUser {
   // Profile fields
   bio: string | null
   location: string | null
+  locationCity: string | null
+  locationCountry: string | null
   links: ProfileLink[] | null
   avatarUrl: string | null
   heroUrl: string | null

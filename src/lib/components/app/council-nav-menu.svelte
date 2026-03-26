@@ -20,11 +20,11 @@
   <Sidebar.Menu>
     <Sidebar.MenuItem>
       <Sidebar.MenuButton
-        isActive={page.url.pathname === `/council/${membership.councilId}`}
+        isActive={page.url.pathname === `/nation/councils/${membership.councilId}`}
         tooltipContent={membership.councilName}
       >
         {#snippet child({ props })}
-          <a href="/council/{membership.councilId}" {...props} onclick={closeMobile}>
+          <a href="/nation/councils/{membership.councilId}" {...props} onclick={closeMobile}>
             <Building2 />
             <span>{membership.councilName}</span>
           </a>
@@ -33,11 +33,11 @@
     </Sidebar.MenuItem>
     <Sidebar.MenuItem>
       <Sidebar.MenuButton
-        isActive={page.url.pathname.startsWith(`/council/${membership.councilId}/sessions`)}
+        isActive={page.url.pathname.startsWith(`/nation/councils/${membership.councilId}/sessions`)}
         tooltipContent="Sessions"
       >
         {#snippet child({ props })}
-          <a href="/council/{membership.councilId}/sessions" {...props} onclick={closeMobile}>
+          <a href="/nation/councils/{membership.councilId}/sessions" {...props} onclick={closeMobile}>
             <CalendarDays />
             <span>Sessions</span>
           </a>
@@ -46,11 +46,11 @@
     </Sidebar.MenuItem>
     <Sidebar.MenuItem>
       <Sidebar.MenuButton
-        isActive={page.url.pathname.startsWith(`/council/${membership.councilId}/proposals`)}
+        isActive={page.url.pathname.startsWith(`/nation/councils/${membership.councilId}/proposals`)}
         tooltipContent="Review Proposals"
       >
         {#snippet child({ props })}
-          <a href="/council/{membership.councilId}/proposals" {...props} onclick={closeMobile}>
+          <a href="/nation/councils/{membership.councilId}/proposals" {...props} onclick={closeMobile}>
             <ClipboardList />
             <span>Review Proposals</span>
           </a>

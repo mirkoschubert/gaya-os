@@ -11,6 +11,7 @@ import {
   listAllCouncils,
   setCouncilMembership
 } from '$lib/server/services/councils'
+import { listAllCities, addCityMember, removeCityMember } from '$lib/server/services/cities'
 import { sendVerificationEmail } from '$lib/server/email'
 import { createEmailVerificationToken } from 'better-auth/api'
 import { auth } from '$lib/server/auth'
@@ -22,10 +23,11 @@ export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users')))
     error(403, 'Forbidden')
 
-  const [users, applications, councils] = await Promise.all([
+  const [users, applications, councils, cities] = await Promise.all([
     listUsers(),
     listAllApplications(),
-    listAllCouncils()
+    listAllCouncils(),
+    listAllCities()
   ])
 
   // Build a map userId → application for quick lookup in the template
@@ -35,6 +37,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     users,
     applicationsByUser: Object.fromEntries(applicationsByUser),
     councils,
+    cities,
     debugMode: isDebugMode()
   }
 }
@@ -52,7 +55,11 @@ export const actions: Actions = {
     if (userId === locals.user.id) {
       return fail(400, { message: 'Cannot change your own role.' })
     }
-    await setUserRole(userId, role, locals.user.id)
+    try {
+      await setUserRole(userId, role, locals.user.id)
+    } catch (e) {
+      return fail(400, { message: e instanceof Error ? e.message : 'Unknown error.' })
+    }
     return { success: true }
   },
 
@@ -116,6 +123,28 @@ export const actions: Actions = {
 
     try {
       await setCouncilMembership({ userId, unitId, isMember, adminId: locals.user.id })
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Unknown error'
+      return fail(400, { message })
+    }
+    return { success: true }
+  },
+
+  setCityMembership: async ({ locals, request }) => {
+    if (!locals.user || !(await hasCapability(locals.user, 'can_manage_users')))
+      error(403, 'Forbidden')
+    const data = await request.formData()
+    const userId = data.get('userId') as string
+    const cityId = data.get('cityId') as string
+    const isMember = data.get('isMember') === 'true'
+    if (!userId || !cityId) return fail(400, { message: 'Missing userId or cityId.' })
+
+    try {
+      if (isMember) {
+        await addCityMember({ cityId, userId, actorId: locals.user.id })
+      } else {
+        await removeCityMember({ cityId, userId, actorId: locals.user.id })
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Unknown error'
       return fail(400, { message })

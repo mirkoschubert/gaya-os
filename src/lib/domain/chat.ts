@@ -1,7 +1,7 @@
 // Pure domain types for the Channel/Messages system.
 // No Prisma, no HTTP - safe to import anywhere including client-side code.
 
-export type ChannelType = 'COUNCIL_INTERNAL' | 'CITIZEN_GENERAL' | 'COUNCIL_PUBLIC' | 'DIRECT_MESSAGE'
+export type ChannelType = 'COUNCIL_INTERNAL' | 'CITIZEN_GENERAL' | 'COUNCIL_PUBLIC' | 'DIRECT_MESSAGE' | 'CITY_PUBLIC'
 export type MessageReactionType = 'THUMBS_UP' | 'THUMBS_DOWN' | 'QUESTION'
 
 export interface ReactionSummary {
@@ -29,13 +29,14 @@ export interface MessageEntry {
 
 export interface UserChannelEntry {
   channelId: string
-  channelName: string // council name for COUNCIL_INTERNAL; peer displayName for DM; council name for COUNCIL_PUBLIC
+  channelName: string // council name for COUNCIL_INTERNAL; peer displayName for DM; council name for COUNCIL_PUBLIC; city name for CITY_PUBLIC
   type: ChannelType
   councilId: string | null
+  cityId: string | null
   otherUserId: string | null // DM: the other participant's id
   otherUserAvatarUrl: string | null
   unreadCount: number
-  closeable: boolean // false for COUNCIL_INTERNAL and CITIZEN_GENERAL
+  closeable: boolean // false for COUNCIL_INTERNAL, CITIZEN_GENERAL, and CITY_PUBLIC
 }
 
 export interface ChannelSummary {

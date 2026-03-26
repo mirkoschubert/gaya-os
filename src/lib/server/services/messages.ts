@@ -62,7 +62,7 @@ function toMessageEntry(raw: {
 
 export async function assertChannelAccess(channelId: string, userId: string): Promise<void> {
   const [channel, user, settings] = await Promise.all([
-    prisma.channel.findUnique({ where: { id: channelId }, select: { type: true, councilId: true } }),
+    prisma.channel.findUnique({ where: { id: channelId }, select: { type: true, councilId: true, cityId: true } }),
     prisma.user.findUnique({ where: { id: userId }, select: { civicStatus: true, role: true } }),
     getAllSettings()
   ])
@@ -111,6 +111,20 @@ export async function assertChannelAccess(channelId: string, userId: string): Pr
     return
   }
 
+  if (channel.type === 'CITY_PUBLIC' && channel.cityId) {
+    // Citizens only - visitors are denied even if visitor chat is enabled
+    if (user.civicStatus !== 'CITIZEN' && user.role !== 'ADMIN') {
+      error(403, 'Only citizens can access city channels')
+    }
+    const membership = await prisma.cityMembership.findUnique({
+      where: { cityId_userId: { cityId: channel.cityId, userId } }
+    })
+    if (!membership && user.role !== 'ADMIN') {
+      error(403, 'You are not a member of this city')
+    }
+    return
+  }
+
   error(403, 'Access denied')
 }
 
@@ -122,7 +136,7 @@ export async function getUserChannels(userId: string): Promise<UserChannelEntry[
     where: { userId, hiddenAt: null },
     include: {
       channel: {
-        select: { id: true, type: true, councilId: true, name: true }
+        select: { id: true, type: true, councilId: true, cityId: true, name: true }
       }
     }
   })
@@ -143,6 +157,7 @@ export async function getUserChannels(userId: string): Promise<UserChannelEntry[
     channelName: 'Citizens',
     type: 'CITIZEN_GENERAL',
     councilId: null,
+    cityId: null,
     otherUserId: null,
     otherUserAvatarUrl: null,
     unreadCount: citizenUnread,
@@ -182,6 +197,7 @@ export async function getUserChannels(userId: string): Promise<UserChannelEntry[
           channelName: council.name,
           type: 'COUNCIL_INTERNAL',
           councilId: council.id,
+          cityId: null,
           otherUserId: null,
           otherUserAvatarUrl: null,
           unreadCount,
@@ -189,6 +205,43 @@ export async function getUserChannels(userId: string): Promise<UserChannelEntry[
         })
       }
     }
+  }
+
+  // Step 2.5: CITY_PUBLIC channels — for city members (Citizens only), not closeable
+  const cityMemberships = await prisma.cityMembership.findMany({
+    where: { userId },
+    include: {
+      city: {
+        select: {
+          id: true,
+          name: true,
+          channels: { where: { type: 'CITY_PUBLIC' }, select: { id: true } }
+        }
+      }
+    }
+  })
+
+  for (const cm of cityMemberships) {
+    const cityChannel = cm.city.channels[0]
+    if (!cityChannel) continue
+    const lastReadMembership = myMemberships.find((mm) => mm.channelId === cityChannel.id)
+    const lastReadAt = lastReadMembership?.lastReadAt ?? lastReadMembership?.joinedAt ?? null
+    const unreadCount = lastReadAt
+      ? await prisma.message.count({
+          where: { channelId: cityChannel.id, createdAt: { gt: lastReadAt }, deletedAt: null }
+        })
+      : 0
+    entries.push({
+      channelId: cityChannel.id,
+      channelName: cm.city.name,
+      type: 'CITY_PUBLIC',
+      councilId: null,
+      cityId: cm.city.id,
+      otherUserId: null,
+      otherUserAvatarUrl: null,
+      unreadCount,
+      closeable: false
+    })
   }
 
   // Step 3: DIRECT_MESSAGE channels — closeable, hidden when hiddenAt is set
@@ -215,6 +268,7 @@ export async function getUserChannels(userId: string): Promise<UserChannelEntry[
         channelName: peer.name,
         type: 'DIRECT_MESSAGE',
         councilId: null,
+        cityId: null,
         otherUserId: peer.id,
         otherUserAvatarUrl: peer.avatarUrl ?? null,
         unreadCount,
@@ -235,6 +289,7 @@ export async function getUserChannels(userId: string): Promise<UserChannelEntry[
       channelName: m.channel.name ?? 'Council',
       type: 'COUNCIL_PUBLIC',
       councilId: m.channel.councilId,
+      cityId: null,
       otherUserId: null,
       otherUserAvatarUrl: null,
       unreadCount,
@@ -274,6 +329,26 @@ export async function getOrCreateCouncilChannel(councilId: string) {
       councilId,
       type: 'COUNCIL_INTERNAL',
       name: council?.name ?? 'Council Chat'
+    }
+  })
+}
+
+export async function getOrCreateCityPublicChannel(cityId: string) {
+  const existing = await prisma.channel.findFirst({
+    where: { cityId, type: 'CITY_PUBLIC' }
+  })
+  if (existing) return existing
+
+  const city = await prisma.city.findUnique({
+    where: { id: cityId },
+    select: { name: true }
+  })
+
+  return prisma.channel.create({
+    data: {
+      cityId,
+      type: 'CITY_PUBLIC',
+      name: city?.name ?? 'City Chat'
     }
   })
 }

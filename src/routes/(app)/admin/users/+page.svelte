@@ -17,6 +17,7 @@
   import type { ApplicationView } from '$lib/server/services/citizenship'
   import type { AdminUserView } from '$lib/server/services/users'
   import type { CouncilOption } from '$lib/server/services/councils'
+  import type { CitySummary } from '$lib/domain/cities'
 
   let { data, form } = $props()
 
@@ -451,6 +452,34 @@
                 </div>
               {/if}
             {/if}
+
+            {#if selectedUser.civicStatus === 'CITIZEN' && (data.cities as CitySummary[]).length > 0}
+              <Separator />
+              <p class="text-muted-foreground text-xs uppercase tracking-wide">City Membership</p>
+              <div class="space-y-2">
+                {#each (data.cities as CitySummary[]) as city}
+                  {@const isMember = selectedUser.cityMemberships.some((m) => m.cityId === city.id)}
+                  <div class="flex items-center justify-between rounded-md border px-3 py-2">
+                    <div>
+                      <p class="text-sm font-medium">{city.name}</p>
+                      <p class="text-xs text-muted-foreground font-mono">#{city.slug}</p>
+                    </div>
+                    <form method="POST" action="?/setCityMembership" use:enhance={reloadAfter}>
+                      <input type="hidden" name="userId" value={selectedUser.id} />
+                      <input type="hidden" name="cityId" value={city.id} />
+                      <input type="hidden" name="isMember" value={String(!isMember)} />
+                      <Button
+                        type="submit"
+                        variant={isMember ? 'destructive' : 'outline'}
+                        size="sm"
+                      >
+                        {isMember ? 'Remove' : 'Add'}
+                      </Button>
+                    </form>
+                  </div>
+                {/each}
+              </div>
+            {/if}
           </Tabs.Content>
 
           <!-- Council Tab -->
@@ -492,6 +521,7 @@
               {/if}
             {/if}
           </Tabs.Content>
+
         </Tabs.Root>
       </div>
     {/if}

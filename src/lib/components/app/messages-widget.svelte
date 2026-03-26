@@ -5,7 +5,7 @@
   import { Button } from '$lib/components/ui/button'
   import { Textarea } from '$lib/components/ui/textarea'
   import {
-    MessageSquare, X, ChevronDown, Send, Users, Building2, Lock,
+    MessageSquare, X, ChevronDown, Send, Users, Building2, Lock, MapPin,
     PanelLeftClose, PanelLeftOpen, Trash2, Pin, VolumeX, Eraser, ShieldAlert
   } from '@lucide/svelte'
   import type { UserChannelEntry, MessageEntry } from '$lib/domain/chat'
@@ -27,12 +27,25 @@
   let channels = $state<UserChannelEntry[]>([])
   let activeChannelId = $state<string | null>(null)
   let localUnread = $state<Record<string, number>>({})
+  // Track channels the user has explicitly closed so we don't re-add them on prop updates
+  const closedChannelIds = new Set<string>()
 
   $effect.pre(() => {
     if (channels.length === 0 && propChannels.length > 0) {
       channels = propChannels
       activeChannelId = propChannels[0]?.channelId ?? null
       localUnread = Object.fromEntries(propChannels.map((c) => [c.channelId, c.unreadCount]))
+    } else if (propChannels.length > channels.length) {
+      // Merge genuinely new channels (e.g. after Contact Council creates a new channel),
+      // but skip channels the user has already closed in this session.
+      const existingIds = new Set(channels.map((c) => c.channelId))
+      const newChannels = propChannels.filter(
+        (c) => !existingIds.has(c.channelId) && !closedChannelIds.has(c.channelId)
+      )
+      for (const ch of newChannels) {
+        channels = [...channels, ch]
+        localUnread[ch.channelId] = ch.unreadCount
+      }
     }
   })
 
@@ -213,6 +226,7 @@
   }
 
   async function closeChannel(channelId: string) {
+    closedChannelIds.add(channelId)
     await fetch(`/api/messages/${channelId}`, { method: 'DELETE' })
     disconnectSSE(channelId)
     channels = channels.filter((c) => c.channelId !== channelId)
@@ -351,9 +365,15 @@
         isOpen = true
         await switchChannel(cmd.channelId)
       } else {
+        // User explicitly re-opened a channel (e.g. Contact Council again after closing)
+        closedChannelIds.delete(cmd.channelId)
         await invalidateAll()
+        // After invalidateAll, propChannels is updated. $effect.pre merges new channels
+        // into `channels` on the next Svelte tick. We wait for that.
+        await Promise.resolve()
+        connectSSE(cmd.channelId)
         isOpen = true
-        activeChannelId = cmd.channelId
+        await switchChannel(cmd.channelId)
       }
       messagesCommand.set(null)
     })
@@ -415,6 +435,8 @@
                   <Users class="size-3.5" />
                 {:else if ch.type === 'COUNCIL_INTERNAL'}
                   <Lock class="size-3.5" />
+                {:else if ch.type === 'CITY_PUBLIC'}
+                  <MapPin class="size-3.5" />
                 {:else}
                   <Building2 class="size-3.5" />
                 {/if}

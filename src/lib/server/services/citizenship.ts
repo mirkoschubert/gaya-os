@@ -1,6 +1,7 @@
 import { prisma } from '$lib/server/prisma'
 import { logAction } from './audit'
 import { getAllSettings } from './settings'
+import { addCityMember } from './cities'
 
 // ──────────────────────────────────────────────
 // Types
@@ -19,6 +20,7 @@ export interface ApplicationData {
   lastName: string
   country: string
   city: string
+  cityId: string        // required: chosen City entity id
   motivationText: string
 }
 
@@ -287,6 +289,7 @@ export async function submitCitizenshipApplication(
       lastName: data.lastName,
       country: data.country,
       city: data.city,
+      cityId: data.cityId,
       motivationText: data.motivationText,
       status: 'PENDING',
       flags: flags as object[],
@@ -305,6 +308,7 @@ export async function submitCitizenshipApplication(
       lastName: data.lastName,
       country: data.country,
       city: data.city,
+      cityId: data.cityId,
       motivationText: data.motivationText,
       status: 'PENDING',
       flags: flags as object[],
@@ -411,6 +415,15 @@ export async function approveCitizenshipApplication(
     entityId: application.userId,
     metadata: { citizenId, reviewerId, applicationId, grantedAt: now.toISOString() }
   })
+
+  // Add to chosen city if specified in the application
+  if (application.cityId) {
+    await addCityMember({
+      cityId: application.cityId,
+      userId: application.userId,
+      actorId: reviewerId
+    })
+  }
 }
 
 /**

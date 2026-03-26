@@ -38,6 +38,23 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
+          // If no admin exists yet, promote the first user automatically.
+          const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } })
+          if (adminCount === 0) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            let citizenId = ''
+            for (let attempt = 0; attempt < 10; attempt++) {
+              const rand = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+              const candidate = `CX-${rand}`
+              const existing = await prisma.user.findUnique({ where: { citizenId: candidate } })
+              if (!existing) { citizenId = candidate; break }
+            }
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { role: 'ADMIN', civicStatus: 'CITIZEN', citizenId, joinedAt: new Date() }
+            })
+          }
+
           await logAction({
             userId: user.id,
             action: 'USER_REGISTERED',
@@ -145,6 +162,16 @@ export const auth = betterAuth({
         input: true
       },
       location: {
+        type: 'string',
+        required: false,
+        input: true
+      },
+      locationCity: {
+        type: 'string',
+        required: false,
+        input: true
+      },
+      locationCountry: {
         type: 'string',
         required: false,
         input: true

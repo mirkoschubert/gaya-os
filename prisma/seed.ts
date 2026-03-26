@@ -14,6 +14,7 @@ const ROLES = ['VISITOR', 'CITIZEN', 'COUNCIL_MEMBER', 'MODERATOR', 'ADMIN'] as 
 const DEFAULT_MATRIX: Record<string, Record<string, boolean>> = {
   VISITOR: {
     has_profile: false,
+    can_list_in_nation: false,
     can_view_profiles: true,
     can_edit_own_profile: false,
     can_delete_own_account: false,
@@ -35,10 +36,12 @@ const DEFAULT_MATRIX: Record<string, Record<string, boolean>> = {
     can_review_proposals: false,
     can_initiate_internal_vote: false,
     can_initiate_sanction_vote: false,
-    can_manage_council: false
+    can_manage_council: false,
+    can_manage_cities: false
   },
   CITIZEN: {
     has_profile: true,
+    can_list_in_nation: true,
     can_view_profiles: true,
     can_edit_own_profile: true,
     can_delete_own_account: true,
@@ -60,13 +63,15 @@ const DEFAULT_MATRIX: Record<string, Record<string, boolean>> = {
     can_review_proposals: false,
     can_initiate_internal_vote: false,
     can_initiate_sanction_vote: false,
-    can_manage_council: false
+    can_manage_council: false,
+    can_manage_cities: false
   },
   // COUNCIL_MEMBER row: only the extra rights beyond CITIZEN.
   // At runtime, capabilities are merged (OR) with the CITIZEN row via an
   // isCouncilMember flag in +layout.server.ts (Membership.role = COUNCIL_MEMBER).
   COUNCIL_MEMBER: {
     has_profile: false,
+    can_list_in_nation: false,
     can_view_profiles: false,
     can_edit_own_profile: false,
     can_delete_own_account: false,
@@ -88,11 +93,13 @@ const DEFAULT_MATRIX: Record<string, Record<string, boolean>> = {
     can_review_proposals: true,
     can_initiate_internal_vote: true,
     can_initiate_sanction_vote: true,
-    can_manage_council: false
+    can_manage_council: false,
+    can_manage_cities: false
   },
   // MODERATOR row: only the extra technical rights beyond CITIZEN.
   MODERATOR: {
     has_profile: false,
+    can_list_in_nation: false,
     can_view_profiles: false,
     can_edit_own_profile: false,
     can_delete_own_account: false,
@@ -114,11 +121,13 @@ const DEFAULT_MATRIX: Record<string, Record<string, boolean>> = {
     can_review_proposals: false,
     can_initiate_internal_vote: false,
     can_initiate_sanction_vote: false,
-    can_manage_council: false
+    can_manage_council: false,
+    can_manage_cities: false
   },
   // ADMIN row: only the extra technical rights beyond CITIZEN.
   ADMIN: {
     has_profile: false,
+    can_list_in_nation: false,
     can_view_profiles: false,
     can_edit_own_profile: false,
     can_delete_own_account: false,
@@ -140,7 +149,8 @@ const DEFAULT_MATRIX: Record<string, Record<string, boolean>> = {
     can_review_proposals: false,
     can_initiate_internal_vote: false,
     can_initiate_sanction_vote: false,
-    can_manage_council: true
+    can_manage_council: true,
+    can_manage_cities: true
   }
 }
 

@@ -6,6 +6,7 @@ import {
 } from '$lib/server/services/citizenship'
 import { getAllSettings } from '$lib/server/services/settings'
 import { hasCapability } from '$lib/server/services/roles'
+import { listAllCities } from '$lib/server/services/cities'
 import type { RequestContext } from '$lib/server/services/citizenship'
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -16,11 +17,12 @@ export const load: PageServerLoad = async ({ locals }) => {
     application = await getApplicationByUserId(locals.user.id)
   }
 
-  const settings = await getAllSettings()
+  const [settings, cities] = await Promise.all([getAllSettings(), listAllCities()])
 
   return {
     user: locals.user,
     application,
+    cities,
     motivationMinChars: settings.citizenship.motivationMinChars,
     membershipOpen: settings.citizenship.open
   }
@@ -38,6 +40,7 @@ export const actions: Actions = {
     const lastName = (data.get('lastName') as string)?.trim()
     const country = (data.get('country') as string)?.trim()
     const city = (data.get('city') as string)?.trim()
+    const cityId = (data.get('cityId') as string)?.trim()
     const motivationText = (data.get('motivationText') as string)?.trim()
     const fingerprintId = (data.get('fingerprintId') as string)?.trim() || undefined
     const constitutionAcknowledged = data.get('constitutionAcknowledged') === 'on'
@@ -57,6 +60,9 @@ export const actions: Actions = {
     }
     if (!city || city.length < 1) {
       return fail(400, { error: 'City is required.' })
+    }
+    if (!cityId) {
+      return fail(400, { error: 'You must choose a city to join.' })
     }
 
     const settings = await getAllSettings()
@@ -82,7 +88,7 @@ export const actions: Actions = {
     try {
       await submitCitizenshipApplication(
         locals.user.id,
-        { firstName, middleNames, lastName, country, city: city!, motivationText },
+        { firstName, middleNames, lastName, country, city: city!, cityId: cityId!, motivationText },
         context
       )
     } catch (e) {

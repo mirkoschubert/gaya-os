@@ -2,7 +2,7 @@
   import { page } from '$app/state'
   import * as Sidebar from '$lib/components/ui/sidebar'
   import { useSidebar } from '$lib/components/ui/sidebar'
-  import { Users, UserRound, IdCard, type Icon } from '@lucide/svelte'
+  import { Globe, UserRound, IdCard, type Icon } from '@lucide/svelte'
   import { useSession } from '$lib/auth-client'
   import type { AppUser } from '$lib/domain/auth'
   import type { Component } from 'svelte'
@@ -15,9 +15,9 @@
   const canApplyCitizenship = $derived(caps['can_apply_citizenship'] ?? false)
 
   const navItems = $derived<{ href: string; label: string; icon: Component<Icon> }[]>([
-    { href: '/citizens', label: 'Citizens', icon: Users },
+    { href: '/nation', label: 'Nation', icon: Globe },
     ...(hasProfile && user?.username
-      ? [{ href: `/citizens/${user.username}`, label: 'My Profile', icon: UserRound }]
+      ? [{ href: `/nation/citizens/${user.username}`, label: 'My Profile', icon: UserRound }]
       : []),
     { href: '/id-card', label: canApplyCitizenship ? 'Citizenship' : 'ID Card', icon: IdCard }
   ])
@@ -35,7 +35,7 @@
   {#each navItems as item}
     <Sidebar.MenuItem>
       <Sidebar.MenuButton
-        isActive={page.url.pathname === item.href}
+        isActive={item.href === '/nation' ? page.url.pathname.startsWith('/nation') : page.url.pathname === item.href}
         tooltipContent={item.label}
       >
         {#snippet child({ props })}

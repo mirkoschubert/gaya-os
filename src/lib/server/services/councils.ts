@@ -15,6 +15,7 @@ export interface PublicCouncilProfile {
   name: string
   type: string
   scopeDescription: string | null
+  banner: string | null
   unitName: string
   memberCount: number
   members: {
@@ -60,6 +61,7 @@ export async function listPublicCouncilProfiles(): Promise<PublicCouncilProfile[
       name: c.name,
       type: c.type,
       scopeDescription: c.scopeDescription,
+      banner: c.banner ?? null,
       unitName: c.unit.name,
       memberCount: c.unit.memberships.length,
       members: c.unit.memberships.map((m) => ({
@@ -299,12 +301,28 @@ export async function getCouncilDetail(councilId: string): Promise<CouncilDetail
     name: council.name,
     type: council.type as CouncilDetail['type'],
     scopeDescription: council.scopeDescription,
+    banner: council.banner ?? null,
     createdAt: council.createdAt,
     members,
     representatives,
     nextSession,
     openProposalCount
   }
+}
+
+export async function updateCouncilBanner(
+  councilId: string,
+  banner: string | null,
+  actorId: string
+): Promise<void> {
+  await prisma.council.update({ where: { id: councilId }, data: { banner } })
+  await logAction({
+    userId: actorId,
+    action: 'COUNCIL_UPDATED',
+    entityType: 'COUNCIL',
+    entityId: councilId,
+    metadata: { field: 'banner' }
+  })
 }
 
 export async function listSessions(councilId: string): Promise<CouncilSessionSummary[]> {

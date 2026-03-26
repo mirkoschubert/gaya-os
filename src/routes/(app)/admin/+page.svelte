@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card'
   import { Button } from '$lib/components/ui/button'
-  import { Users, FileText, Scale, ShieldCheck } from '@lucide/svelte'
+  import { Users, FileText, Scale, ShieldCheck, MapPin } from '@lucide/svelte'
 </script>
 
 <svelte:head><title>Admin · Gaya OS</title></svelte:head>
@@ -53,9 +53,22 @@
     </Card.Header>
     <Card.Content>
       <p class="text-muted-foreground mb-4 text-sm">
-        Review and adjust the capability matrix for each role — what Visitors, Citizens, Council Members, Moderators, and Admins can do.
+        Review and adjust the capability matrix for each role - what Visitors, Citizens, Council Members, Moderators, and Admins can do.
       </p>
       <Button href="/admin/roles" size="sm">Manage roles</Button>
+    </Card.Content>
+  </Card.Root>
+
+  <Card.Root>
+    <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card.Title class="text-sm font-medium">Cities</Card.Title>
+      <MapPin class="text-muted-foreground size-4" />
+    </Card.Header>
+    <Card.Content>
+      <p class="text-muted-foreground mb-4 text-sm">
+        Create and manage cities of the micro-nation. Control which cities are visible to citizens.
+      </p>
+      <Button href="/admin/cities" size="sm">Manage cities</Button>
     </Card.Content>
   </Card.Root>
 </div>
