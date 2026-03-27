@@ -5,6 +5,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.8.1] - 2026-03-27
+
+### Added
+- PWA support: installable via browser install button, service worker with Workbox caching (precache, NetworkFirst for API, CacheFirst for images)
+- Custom inline SVG component (`SocialIcon.svelte`) replacing Arcticons/Iconify - removes 12 MB bundle dependency
+- PWA icons generated from `favicon.svg` via `@vite-pwa/assets-generator`, stored in `static/pwa/`
+- `vercel.json` cache headers: `sw.js` served with `no-store` to prevent Vercel CDN caching
+
+### Changed
+- Social link icon references updated to use new `SocialIcon` component
+
+---
+
 ## [0.8.0] - 2026-03-26
 
 ### Added

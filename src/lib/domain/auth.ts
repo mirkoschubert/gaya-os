@@ -9,7 +9,7 @@ export interface ProfileLink {
 export interface LinkType {
   value: string
   label: string
-  iconName: string        // arcticons icon name, e.g. 'arcticons:bluesky'
+  iconKey: string         // icon key for SocialIcon component, e.g. 'bluesky'
   placeholder: string     // shown in input field
   inputLabel: string      // describes what to enter
   linkable: boolean       // false = display-only (no href)
@@ -21,7 +21,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'website',
     label: 'Website',
-    iconName: 'arcticons:xbrowser',
+    iconKey: 'xbrowser',
     placeholder: 'https://example.com',
     inputLabel: 'URL',
     linkable: true,
@@ -30,7 +30,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'bluesky',
     label: 'Bluesky',
-    iconName: 'arcticons:bluesky',
+    iconKey: 'bluesky',
     placeholder: '@you.bsky.social',
     inputLabel: 'Handle (e.g. @you.bsky.social)',
     linkable: true,
@@ -42,7 +42,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'mastodon',
     label: 'Mastodon',
-    iconName: 'arcticons:mastodon',
+    iconKey: 'mastodon',
     placeholder: '@you@instance.social',
     inputLabel: 'Handle (e.g. @you@instance.social)',
     linkable: true,
@@ -55,7 +55,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'matrix',
     label: 'Matrix / Element',
-    iconName: 'arcticons:element',
+    iconKey: 'element',
     placeholder: '@you:matrix.org',
     inputLabel: 'Matrix ID (e.g. @you:matrix.org)',
     linkable: true,
@@ -67,7 +67,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'xmpp',
     label: 'XMPP',
-    iconName: 'arcticons:xmpp',
+    iconKey: 'xmpp',
     placeholder: 'you@jabber.org',
     inputLabel: 'JID (e.g. you@jabber.org)',
     linkable: false,
@@ -76,7 +76,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'signal',
     label: 'Signal',
-    iconName: 'arcticons:signal',
+    iconKey: 'signal',
     placeholder: 'signal.me/u/... or username',
     inputLabel: 'Signal username or signal.me link',
     linkable: true,
@@ -88,7 +88,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'peertube',
     label: 'PeerTube',
-    iconName: 'arcticons:peertube',
+    iconKey: 'peertube',
     placeholder: '@you@instance.tv',
     inputLabel: 'Handle (e.g. @you@peertube.tv)',
     linkable: true,
@@ -100,7 +100,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'misskey',
     label: 'Misskey / Calckey',
-    iconName: 'arcticons:misskey',
+    iconKey: 'misskey',
     placeholder: '@you@misskey.io',
     inputLabel: 'Handle (e.g. @you@misskey.io)',
     linkable: true,
@@ -112,7 +112,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'diaspora',
     label: 'Diaspora',
-    iconName: 'arcticons:diaspora',
+    iconKey: 'diaspora',
     placeholder: 'you@pod.example.com',
     inputLabel: 'Handle (e.g. you@joindiaspora.com)',
     linkable: true,
@@ -125,7 +125,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'funkwhale',
     label: 'Funkwhale',
-    iconName: 'arcticons:funkwhale',
+    iconKey: 'funkwhale',
     placeholder: '@you@open.audio',
     inputLabel: 'Handle (e.g. @you@open.audio)',
     linkable: true,
@@ -137,7 +137,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'briar',
     label: 'Briar',
-    iconName: 'arcticons:briar',
+    iconKey: 'briar',
     placeholder: 'briar:// link or nickname',
     inputLabel: 'Briar link or nickname',
     linkable: false,
@@ -146,7 +146,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'email',
     label: 'E-Mail',
-    iconName: 'arcticons:fairemail',
+    iconKey: 'fairemail',
     placeholder: 'you@example.com',
     inputLabel: 'E-mail address',
     linkable: true,
@@ -155,7 +155,7 @@ export const LINK_TYPES: LinkType[] = [
   {
     value: 'other',
     label: 'Other',
-    iconName: 'arcticons:xbrowser',
+    iconKey: 'xbrowser',
     placeholder: 'https://...',
     inputLabel: 'URL',
     linkable: true,

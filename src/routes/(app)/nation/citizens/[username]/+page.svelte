@@ -8,7 +8,7 @@
   import { Button } from '$lib/components/ui/button'
   import { Separator } from '$lib/components/ui/separator'
   import { MapPin, Link as LinkIcon, Calendar, Pencil, MessageSquare } from '@lucide/svelte'
-  import Icon from '@iconify/svelte'
+  import SocialIcon from '$lib/components/app/SocialIcon.svelte'
   import { countries } from 'countries-list'
   import { LINK_TYPES, getLinkHref } from '$lib/domain/auth'
   import { buildLogSentence, formatRoles } from '$lib/domain/audit'
@@ -194,7 +194,7 @@
           {@const def = LINK_TYPES.find((t) => t.value === link.label)}
           {@const href = def ? getLinkHref(link.label, link.url) : link.url}
           {@const label = def?.label ?? link.label}
-          {@const iconName = def?.iconName ?? 'arcticons:xbrowser'}
+          {@const iconName = def?.iconKey ?? 'xbrowser'}
           {#if href}
             <a
               href={href}
@@ -202,12 +202,12 @@
               rel="noopener noreferrer"
               class="flex items-center gap-1.5 text-sm text-primary hover:underline underline-offset-4"
             >
-              <Icon icon={iconName} width="14" height="14" style="stroke-width: 2" />
+              <SocialIcon icon={iconName} width="14" height="14" />
               {label}
             </a>
           {:else}
             <span class="flex items-center gap-1.5 text-sm text-muted-foreground" title={link.url}>
-              <Icon icon={iconName} width="14" height="14" style="stroke-width: 2" />
+              <SocialIcon icon={iconName} width="14" height="14" />
               {label}: {link.url}
             </span>
           {/if}

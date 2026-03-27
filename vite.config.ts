@@ -24,7 +24,6 @@ export default defineConfig({
 					exclude: ['src/lib/server/**']
 				}
 			},
-
 			{
 				extends: './vite.config.ts',
 				test: {

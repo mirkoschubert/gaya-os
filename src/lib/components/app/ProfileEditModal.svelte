@@ -7,7 +7,7 @@
   import { Label } from '$lib/components/ui/label'
   import { Textarea } from '$lib/components/ui/textarea'
   import { Plus, Trash2, Loader2, ImageUp } from '@lucide/svelte'
-  import Icon from '@iconify/svelte'
+  import SocialIcon from '$lib/components/app/SocialIcon.svelte'
   import { authClient } from '$lib/auth-client'
   import { countries } from 'countries-list'
   import { LINK_TYPES, type ProfileLink } from '$lib/domain/auth'
@@ -346,7 +346,7 @@
                 <div class="relative shrink-0 w-36">
                   {#if linkType}
                     <span class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      <Icon icon={linkType.iconName} width="14" height="14" style="stroke-width: 2" />
+                      <SocialIcon icon={linkType.iconKey} width="14" height="14" />
                     </span>
                   {/if}
                   <select

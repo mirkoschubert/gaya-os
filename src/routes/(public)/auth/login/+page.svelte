@@ -24,7 +24,7 @@
 
     if (result.error) {
       error =
-        result.error.message ?? 'Login failed. Please check your credentials.'
+        String(result.error.message ?? 'Login failed. Please check your credentials.')
     } else {
       await goto('/dashboard')
     }
@@ -39,7 +39,7 @@
     const result = await authClient.signIn.passkey()
 
     if (result?.error) {
-      error = result.error.message ?? 'Passkey sign-in failed.'
+      error = String(result.error.message ?? 'Passkey sign-in failed.')
     } else if (result?.data) {
       await goto('/dashboard')
     }

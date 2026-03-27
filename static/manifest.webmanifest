@@ -1,0 +1,28 @@
+{
+  "name": "Civitas Gaya",
+  "short_name": "Gaya OS",
+  "description": "The digital platform of the Mikronation Civitas Gaya",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#252525",
+  "theme_color": "#20bbcc",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "icons": [
+    { "src": "/pwa/pwa-64x64.png", "sizes": "64x64", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/pwa-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/pwa-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/maskable-icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/gaya-home.webp",
+      "sizes": "1920x1080",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "Civitas Gaya - Home"
+    }
+  ]
+}

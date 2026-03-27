@@ -26,7 +26,7 @@
     })
 
     if (result?.error) {
-      passkeyError = result.error.message ?? 'Failed to register passkey.'
+      passkeyError = String(result.error.message ?? 'Failed to register passkey.')
     } else {
       passkeySuccess = true
       passkeyName = ''
